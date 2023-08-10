@@ -9,17 +9,18 @@ abstract contract AppsAccount is AppsManager, BaseAccount {
         UserOperation calldata userOp,
         bytes32 userOpHash,
         uint256 missingAccountFunds
-    ) external virtual override returns (uint256 validationData) {
+    )
+        external
+        virtual
+        override
+        runApps(
+            abi.encode(userOp, userOpHash, missingAccountFunds, validationData)
+        )
+        returns (uint256 validationData)
+    {
         _requireFromEntryPoint();
-        /// @dev NEW: ensures there's enough funds to pay for the gas in the worst case so that msg.sender
-        ///      doesn't end up holding the bag if there are no funds after the computations.
-        _requireEnoughBalance(); // new
         validationData = _validateSignature(userOp, userOpHash);
         _validateNonce(userOp.nonce);
-        /// @dev NEW
-        apps.run(
-            abi.encode(userOp, userOpHash, missingAccountFunds, validationData)
-        );
         _payPrefund(missingAccountFunds);
     }
 }
