@@ -17,7 +17,7 @@ abstract contract AppsAccount is AppsManager, BaseAccount {
         validationData = _validateSignature(userOp, userOpHash);
         _validateNonce(userOp.nonce);
         /// @dev NEW
-        _runApps(
+        apps.run(
             abi.encode(userOp, userOpHash, missingAccountFunds, validationData)
         );
         _payPrefund(missingAccountFunds);
