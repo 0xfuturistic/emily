@@ -23,7 +23,8 @@ abstract contract CommitmentsAccount is BaseAccount {
         _payPrefund(missingAccountFunds);
 
         /// @dev We first check if the user has enough funds to pay for the worst case resource usage.
-        //       That is, we assume that the user will evaluate the most expensive series of commitments.
+        //       That is, we assume we will have to evaluate the longest series of commitments before
+        //       reverting at the end.
         uint256 gasPreValiation;
         require(
             address(this).balance >= (gasPreValiation = gasleft()) * tx.gasprice,
@@ -31,8 +32,7 @@ abstract contract CommitmentsAccount is BaseAccount {
         );
 
         /// @dev We now check if the user can evaluate the commitments. We use staticcall as a proxy so
-        //       that the main call doesn't revert if proving fails without having reimbursed the gas
-        ///      used for validation.
+        //       that we can reimburse msg.sender the gas even if evaluating the commitments fails.
         (bool success,) = address(this).staticcall(
             abi.encodeWithSelector(
                 this.evaluateUserCommitments.selector,
@@ -50,7 +50,7 @@ abstract contract CommitmentsAccount is BaseAccount {
 
     /// @dev Sample implementation of what evaluateUserCommitments could look like.
     /// @param user User address.
-    /// @param extraData Extra data to be used for proving commitments.
+    /// @param extraData Extra data to be used for evaluating the commitments commitments.
     function evaluateUserCommitments(address user, bytes memory extraData) external view virtual {
         function (bytes memory) external view[] memory commitments = _getUserCommitments(user);
         for (uint256 i = 0; i < commitments.length; i++) {
