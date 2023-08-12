@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.15;
 
 import {BaseAccount, UserOperation} from "erc4337/core/BaseAccount.sol";
+import {ResourceMetering} from "optimism-contracts/L1/ResourceMetering.sol";
 
 /// @title CommitmentAccount
 /// @dev Contract for managing user commitments and validating user operations.
-abstract contract CommitmentsAccount is BaseAccount {
+abstract contract CommitmentsAccount is BaseAccount, ResourceMetering {
     /// @dev Validates user operation and checks if the user can evaluate the commitments.
     /// @param userOp User operation to be validated.
     /// @param userOpHash Hash of the user operation.
@@ -21,7 +22,11 @@ abstract contract CommitmentsAccount is BaseAccount {
         validationData = _validateSignature(userOp, userOpHash);
         _validateNonce(userOp.nonce);
         _payPrefund(missingAccountFunds);
+        /// @dev new line
+        _validateUserCommitments(userOp.sender, abi.encode(userOp, userOpHash, missingAccountFunds, validationData));
+    }
 
+    function _validateUserCommitments(address user, bytes memory extraData) internal {
         /// @dev We first check if the user has enough funds to pay for the worst case resource usage.
         //       That is, we assume we will have to evaluate the longest series of commitments before
         //       reverting at the end.
@@ -33,13 +38,8 @@ abstract contract CommitmentsAccount is BaseAccount {
 
         /// @dev We now check if the user can evaluate the commitments. We use staticcall as a proxy so
         //       that we can reimburse msg.sender the gas even if evaluating the commitments fails.
-        (bool success,) = address(this).staticcall(
-            abi.encodeWithSelector(
-                this.evaluateUserCommitments.selector,
-                userOp.sender,
-                abi.encode(userOp, userOpHash, missingAccountFunds, validationData)
-            )
-        );
+        (bool success,) =
+            address(this).staticcall(abi.encodeWithSelector(this.evaluateUserCommitments.selector, user, extraData));
 
         /// @dev If the user can't evaluate the commitments, we refund the user for the gas used for validation.
         ///      This is done as an alternative to reverting the transaction and msg.sender incurring the
