@@ -12,3 +12,5 @@ remappings = [
     "openzeppelin-contracts/=lib/erc6551/lib/openzeppelin-contracts/contracts/",
     "optimism-contracts/=lib/optimism/packages/contracts-bedrock/src/",
 ]
+
+gas_reports = ["*"]
