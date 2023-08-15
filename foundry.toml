@@ -11,4 +11,5 @@ remappings = [
     "erc6551/=lib/erc6551/src/",
     "openzeppelin-contracts/=lib/erc6551/lib/openzeppelin-contracts/contracts/",
     "optimism-contracts/=lib/optimism/packages/contracts-bedrock/src/",
+    "forge-std/=lib/forge-std/src/",
 ]
