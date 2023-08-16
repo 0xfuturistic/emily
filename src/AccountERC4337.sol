@@ -4,7 +4,7 @@ pragma solidity ^0.8.15;
 import {BaseAccount as ERC4337BaseAccount, UserOperation} from "erc4337/core/BaseAccount.sol";
 import {Account} from "./Account.sol";
 
-abstract contract ERC4337Account is Account, ERC4337BaseAccount {
+abstract contract AccountERC4337 is Account, ERC4337BaseAccount {
     uint256 constant PROVER_GAS_LIMIT = 100;
 
     function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
