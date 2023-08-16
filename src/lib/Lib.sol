@@ -4,17 +4,17 @@ pragma solidity ^0.8.15;
 import "./types.sol";
 
 library ConstraintsLib {
-    function add(Constraint[] storage constraints, Constraint memory constraint) internal {
-        constraints.push(constraint);
+    function add(Constraint[] storage self, Constraint memory constraint) internal {
+        self.push(constraint);
     }
 
-    function satisfied(Constraint[] storage constraints, bytes memory input, uint256 evaluationGasLimit)
+    function satisfied(Constraint[] storage self, bytes memory input, uint256 evaluationGasLimit)
         internal
         view
         returns (bool)
     {
-        for (uint256 i = 0; i < constraints.length; i++) {
-            function (bytes memory) external view characteristic = constraints[i].characteristic;
+        for (uint256 i = 0; i < self.length; i++) {
+            function (bytes memory) external view characteristic = self[i].characteristic;
             (bool success,) = characteristic.address.staticcall{gas: evaluationGasLimit}(
                 abi.encodeWithSelector(characteristic.selector, input)
             );
@@ -23,7 +23,7 @@ library ConstraintsLib {
         return true;
     }
 
-    function count(Constraint[] storage constraints) internal view returns (uint256) {
-        return constraints.length;
+    function count(Constraint[] storage self) internal view returns (uint256) {
+        return self.length;
     }
 }
