@@ -35,19 +35,19 @@ abstract contract ConstraintsManager is ReentrancyGuard {
         _constraints.add(constraint);
     }
 
-    function _getConstraints() internal view returns (Constraint[] memory constraints_) {
-        constraints_ = _constraints;
-    }
-
-    function _countConstraints() internal view returns (uint256 count) {
-        count = _constraints.count();
-    }
-
     function _areConstraintsAllSatisfied(bytes memory input, uint256 absoluteGasLimit)
         internal
         nonReentrant
         returns (bool satisfied)
     {
         satisfied = _constraints.areAllSatisfied(input, absoluteGasLimit);
+    }
+
+    function _getConstraints() internal view returns (Constraint[] memory constraints_) {
+        constraints_ = _constraints;
+    }
+
+    function _countConstraints() internal view returns (uint256 count) {
+        count = _constraints.count();
     }
 }
