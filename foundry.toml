@@ -13,3 +13,5 @@ remappings = [
     "optimism-contracts/=lib/optimism/packages/contracts-bedrock/src/",
     "forge-std/=lib/forge-std/src/",
 ]
+
+gas_reports = ["*"]
