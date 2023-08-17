@@ -26,11 +26,11 @@ contract ConstraintsManagerTest is Test {
         handler.areConstraintsAllSatisfied(input, absoluteGasLimit);
     }
 
-    function test_getConstraints() public view returns (Constraint[] memory constraints_) {
+    function test_getConstraints() public returns (Constraint[] memory constraints_) {
         constraints_ = handler.getConstraints();
     }
 
-    function test_countConstraints() public view returns (uint256 count) {
+    function test_countConstraints() public returns (uint256 count) {
         count = handler.countConstraints();
     }
 }
