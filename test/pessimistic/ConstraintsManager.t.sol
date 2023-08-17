@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
-import {ConstraintsManager} from "../src/ConstraintsManager.sol";
+import {PessimisticConstraintsManager as ConstraintsManager} from "../../src/PessimisticConstraintsManager.sol";
 
 import {ConstraintsManagerHandler as Handler} from "./ConstraintsManagerHandler.sol";
 

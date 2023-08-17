@@ -16,6 +16,10 @@ abstract contract BaseConstraintsManager is ReentrancyGuard, AccessControl {
 
     error ConstraintsNotAllSatisfied();
 
+    constructor(address constraintsAdder) {
+        _grantRole(CONSTRAINTS_ADDER_ROLE, constraintsAdder);
+    }
+
     /*//////////////////////////////////////////////////////////////
                                 EXTERNAL
     //////////////////////////////////////////////////////////////*/

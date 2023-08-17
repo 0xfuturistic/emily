@@ -5,8 +5,10 @@ import "./BaseConstraintsManager.sol";
 import "./lib/types.sol";
 import "./lib/Lib.sol";
 
-contract OptimisticConstraintsManager is BaseConstraintsManager {
+contract PessimisticConstraintsManager is BaseConstraintsManager {
     using ConstraintsLib for Constraint[];
+
+    constructor(address constraintsAdder) BaseConstraintsManager(constraintsAdder) {}
 
     uint256 public constant CONSTRAINTS_GAS_LIMIT = 500000;
 
