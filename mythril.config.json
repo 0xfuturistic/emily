@@ -1,0 +1,15 @@
+{
+    "remappings": [
+        "@openzeppelin/=lib/openzeppelin-contracts/",
+        "@rari-capital/solmate/=lib/optimism/packages/contracts-bedrock/lib/solmate/",
+        "erc4337/=lib/erc4337/contracts/",
+        "erc6551/=lib/erc6551/src/",
+        "openzeppelin-contracts/=lib/erc6551/lib/openzeppelin-contracts/contracts/",
+        "optimism-contracts/=lib/optimism/packages/contracts-bedrock/src/",
+        "forge-std/=lib/forge-std/src/"
+    ],
+    "optimizer": {
+        "enabled": true,
+        "runs": 200
+    }
+}
