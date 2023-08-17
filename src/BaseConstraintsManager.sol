@@ -7,10 +7,8 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./lib/types.sol";
 import "./lib/Lib.sol";
 
-contract ConstraintsManager is ReentrancyGuard, AccessControl {
+abstract contract BaseConstraintsManager is ReentrancyGuard, AccessControl {
     using ConstraintsLib for Constraint[];
-
-    uint256 public constant CONSTRAINTS_GAS_LIMIT = 500000;
 
     bytes32 public constant CONSTRAINTS_ADDER_ROLE = keccak256("CONSTRAINTS_ADDER_ROLE");
 
@@ -18,9 +16,9 @@ contract ConstraintsManager is ReentrancyGuard, AccessControl {
 
     error ConstraintsNotAllSatisfied();
 
-    constructor(address constraintsAdder) {
-        _grantRole(CONSTRAINTS_ADDER_ROLE, constraintsAdder);
-    }
+    /*//////////////////////////////////////////////////////////////
+                                EXTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     function addConstraint(address contractAddr, bytes4 selector)
         external
@@ -32,7 +30,7 @@ contract ConstraintsManager is ReentrancyGuard, AccessControl {
     }
 
     function areConstraintsAllSatisfied(bytes memory input) external nonReentrant returns (bool satisfied) {
-        satisfied = _areConstraintsAllSatisfied(input, CONSTRAINTS_GAS_LIMIT);
+        satisfied = _areConstraintsAllSatisfied(input);
     }
 
     function getConstraints() external view returns (Constraint[] memory constraints_) {
@@ -56,6 +54,7 @@ contract ConstraintsManager is ReentrancyGuard, AccessControl {
         function (bytes memory) external view characteristic = constraint.characteristic;
 
         assembly {
+            /// @dev Set the characteristic function address and selector.
             characteristic.address := contractAddr
             characteristic.selector := selector
         }
@@ -63,20 +62,7 @@ contract ConstraintsManager is ReentrancyGuard, AccessControl {
         _constraints.add(constraint);
     }
 
-    function _areConstraintsAllSatisfied(bytes memory input, uint256 absoluteGasLimit)
-        internal
-        view
-        virtual
-        returns (bool satisfied)
-    {
-        satisfied = _constraints.areAllSatisfied(input, absoluteGasLimit);
-    }
-
-    function _requireConstraintsAreSatisfied(bytes memory input, uint256 absoluteGasLimit) internal view virtual {
-        if (!_areConstraintsAllSatisfied(input, absoluteGasLimit)) {
-            revert ConstraintsNotAllSatisfied();
-        }
-    }
+    function _areConstraintsAllSatisfied(bytes memory input) internal view virtual returns (bool satisfied);
 
     function _getConstraints() internal view virtual returns (Constraint[] memory constraints_) {
         constraints_ = _constraints;
