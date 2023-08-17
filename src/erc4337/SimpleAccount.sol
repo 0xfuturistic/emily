@@ -18,7 +18,7 @@ import "erc4337/interfaces/IEntryPoint.sol";
  *  has execute, eth handling methods
  *  has a single signer that can send requests through the entryPoint.
  */
-contract SimpleAccount is BaseAccount, UUPSUpgradeable, Initializable {
+abstract contract SimpleAccount is BaseAccount, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
 
     address public owner;

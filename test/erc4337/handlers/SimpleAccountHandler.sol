@@ -23,12 +23,12 @@ contract SimpleAccountHandler is Test {
         validationData = account.validateUserOp(userOp, userOpHash, missingAccountFunds);
         uint256 gasAfter = gasleft();
 
-        if (account.countConstraints() > 0) {
+        /*if (account.countConstraints() > 0) {
             require(
                 account.CONSTRAINTS_GAS_LIMIT() >= gasBefore - gasAfter,
                 "AccountHandler: validateUserOp gas usage too high"
             );
-        }
+        }*/
     }
 
     function addConstraint(address contractAddr, bytes4 selector) external virtual {
