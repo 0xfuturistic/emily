@@ -1,36 +1,35 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {Test, console2, console} from "forge-std/Test.sol";
-import {ConstraintsManagerHandler as Handler} from "./ConstraintsManagerHandler.sol";
+import {Test} from "forge-std/Test.sol";
 import {ConstraintsManager} from "../src/ConstraintsManager.sol";
-import {UserOperation} from "erc4337/core/BaseAccount.sol";
 
-import "../src/lib/types.sol";
+import {ConstraintsManagerHandler as Handler} from "./ConstraintsManagerHandler.sol";
 
-contract ConstraintsManagerTest is Test {
+contract ConstraintsManagerInvariants is Test {
     ConstraintsManager public constraintsManager;
     Handler public handler;
 
     function setUp() public {
         constraintsManager = new ConstraintsManager(address(this));
-        handler = new Handler(constraintsManager, address(this));
+        handler = new Handler(constraintsManager);
+
+        bytes4[] memory selectors = new bytes4[](4);
+        selectors[0] = Handler.addConstraint.selector;
+        selectors[1] = Handler.areConstraintsAllSatisfied.selector;
+        selectors[2] = Handler.getConstraints.selector;
+        selectors[3] = Handler.countConstraints.selector;
+
+        targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
+
         targetContract(address(handler));
     }
 
-    function test_addConstraint(address contractAddr, bytes4 selector) public {
-        handler.addConstraint(contractAddr, selector);
+    function invariant_gasUsed_areConstraintsAllSatisfied() public {
+        assertLe(handler.ghost_gasUsed_areConstraintsAllSatisfied(), constraintsManager.CONSTRAINTS_GAS_LIMIT());
     }
 
-    function test_areConstraintsAllSatisfied(bytes memory input, uint256 absoluteGasLimit) public {
-        handler.areConstraintsAllSatisfied(input, absoluteGasLimit);
-    }
-
-    function test_getConstraints() public returns (Constraint[] memory constraints_) {
-        constraints_ = handler.getConstraints();
-    }
-
-    function test_countConstraints() public returns (uint256 count) {
-        count = handler.countConstraints();
+    function invariant_callSummary() public view {
+        handler.callSummary();
     }
 }

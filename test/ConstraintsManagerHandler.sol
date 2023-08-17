@@ -12,38 +12,53 @@ import "../src/lib/types.sol";
 
 contract ConstraintsManagerHandler is CommonBase, StdCheats, StdUtils {
     ConstraintsManager public constraintsManager;
-    address public constraintsAdder;
+
+    uint256 public ghost_gasUsed_areConstraintsAllSatisfied;
 
     mapping(bytes32 => uint256) public calls;
+
+    address[] public actors;
+    address internal currentActor;
+
+    modifier useActor(uint256 actorIndexSeed) {
+        currentActor = actors[bound(actorIndexSeed, 0, actors.length - 1)];
+        vm.startPrank(currentActor);
+        _;
+        vm.stopPrank();
+    }
 
     modifier countCall(bytes32 key) {
         calls[key]++;
         _;
     }
 
-    constructor(ConstraintsManager constraintsManager_, address constraintsAdder_) {
+    constructor(ConstraintsManager constraintsManager_) {
         constraintsManager = constraintsManager_;
-
-        constraintsAdder = constraintsAdder_;
     }
 
-    function addConstraint(address contractAddr, bytes4 selector) external countCall("addConstraint") {
-        vm.prank(constraintsAdder);
-        constraintsManager.addConstraint(contractAddr, selector);
+    function addConstraint(address contractAddr, bytes4 selector, uint256 actorIndexSeed)
+        external
+        countCall("addConstraint")
+        useActor(actorIndexSeed)
+        returns (Constraint memory constraint)
+    {
+        if (!constraintsManager.hasRole(constraintsManager.CONSTRAINTS_ADDER_ROLE(), currentActor)) vm.expectRevert();
+        constraint = constraintsManager.addConstraint(contractAddr, selector);
     }
 
-    function areConstraintsAllSatisfied(bytes memory input, uint256 absoluteGasLimit)
+    function areConstraintsAllSatisfied(bytes memory input)
         external
         countCall("areConstraintsAllSatisfied")
         returns (bool satisfied)
     {
+        // gas metering for areConstraintsAllSatisfied
         uint256 gasBefore = gasleft();
-        satisfied = constraintsManager.areConstraintsAllSatisfied(input, absoluteGasLimit);
-        uint256 gasAfter = gasleft();
+        constraintsManager.areConstraintsAllSatisfied(input);
+        ghost_gasUsed_areConstraintsAllSatisfied = gasBefore - gasleft();
+        console.log("gas used in areConstraintsAllSatisfied:", ghost_gasUsed_areConstraintsAllSatisfied);
 
-        if (constraintsManager.countConstraints() > 0) {
-            require(absoluteGasLimit >= gasBefore - gasAfter, "AccountHandler: validateUserOp gas usage too high");
-        }
+        // actual call
+        satisfied = constraintsManager.areConstraintsAllSatisfied(input);
     }
 
     function getConstraints() external countCall("getConstraints") returns (Constraint[] memory constraints_) {
