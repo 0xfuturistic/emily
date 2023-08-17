@@ -12,4 +12,4 @@
 	url = https://github.com/openzeppelin/openzeppelin-contracts
 [submodule "lib/uma"]
 	path = lib/uma
-	url = https://github.com/UMAprotocol/protocol/
+	url = https://github.com/lib/uma
