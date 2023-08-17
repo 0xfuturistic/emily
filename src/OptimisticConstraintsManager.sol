@@ -13,6 +13,7 @@ struct Request {
     bool successfullyChallenged;
     function (bool) external callback;
     bytes32 constraintsRoot;
+    bool settled;
 }
 
 contract OptimisticConstraintsManager is BaseConstraintsManager {
@@ -35,7 +36,8 @@ contract OptimisticConstraintsManager is BaseConstraintsManager {
             timestamp: block.timestamp,
             successfullyChallenged: false,
             callback: callback,
-            constraintsRoot: keccak256(abi.encode(_constraints))
+            constraintsRoot: keccak256(abi.encode(_constraints)),
+            settled: false
         });
 
         requests.push(request);
@@ -56,8 +58,9 @@ contract OptimisticConstraintsManager is BaseConstraintsManager {
     }
 
     function settle(uint256 id) public {
-        require(requests[id].timestamp - block.timestamp > LIVENESS);
-
+        require(requests[id].timestamp - block.timestamp > LIVENESS || requests[id].successfullyChallenged);
+        require(!requests[id].settled);
+        requests[id].settled = true;
         requests[id].callback(!requests[id].successfullyChallenged);
     }
 }
