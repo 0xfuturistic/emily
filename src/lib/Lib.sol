@@ -35,6 +35,17 @@ library ConstraintsLib {
         return true;
     }
 
+    function isSatisfied(Constraint memory self, bytes memory input, uint256 characteristicGasLimit)
+        internal
+        view
+        returns (bool satisfied)
+    {
+        function (bytes memory) external view characteristic = self.characteristic;
+        (satisfied,) = characteristic.address.staticcall{gas: characteristicGasLimit}(
+            abi.encodeWithSelector(characteristic.selector, input)
+        );
+    }
+
     /// @dev Returns the number of constraints.
     /// @param self The constraints array.
     /// @return count_ The number of constraints.
