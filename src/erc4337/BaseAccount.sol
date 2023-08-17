@@ -6,8 +6,6 @@ import {ConstraintsManager} from "../ConstraintsManager.sol";
 import "../lib/types.sol";
 
 abstract contract BaseAccount is ConstraintsManager, ERC4337BaseAccount {
-    uint256 public constant CONSTRAINTS_GAS_LIMIT = 1 ether;
-
     constructor(address constraintsAdder) ConstraintsManager(constraintsAdder) {}
 
     function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
