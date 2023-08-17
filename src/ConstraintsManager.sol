@@ -10,11 +10,13 @@ import "./lib/Lib.sol";
 contract ConstraintsManager is ReentrancyGuard, AccessControl {
     using ConstraintsLib for Constraint[];
 
+    uint256 public constant CONSTRAINTS_GAS_LIMIT = 500000;
+
     bytes32 public constant CONSTRAINTS_ADDER_ROLE = keccak256("CONSTRAINTS_ADDER_ROLE");
 
     Constraint[] internal _constraints;
 
-    error ConstraintsNotSatisfied();
+    error ConstraintsNotAllSatisfied();
 
     constructor(address constraintsAdder) {
         _grantRole(CONSTRAINTS_ADDER_ROLE, constraintsAdder);
@@ -29,12 +31,8 @@ contract ConstraintsManager is ReentrancyGuard, AccessControl {
         constraint = _addConstraint(contractAddr, selector);
     }
 
-    function areConstraintsAllSatisfied(bytes memory input, uint256 absoluteGasLimit)
-        external
-        nonReentrant
-        returns (bool satisfied)
-    {
-        satisfied = _areConstraintsAllSatisfied(input, absoluteGasLimit);
+    function areConstraintsAllSatisfied(bytes memory input) external nonReentrant returns (bool satisfied) {
+        satisfied = _areConstraintsAllSatisfied(input, CONSTRAINTS_GAS_LIMIT);
     }
 
     function getConstraints() external view returns (Constraint[] memory constraints_) {
@@ -67,18 +65,16 @@ contract ConstraintsManager is ReentrancyGuard, AccessControl {
 
     function _areConstraintsAllSatisfied(bytes memory input, uint256 absoluteGasLimit)
         internal
+        view
         virtual
-        returns (
-            //nonReentrant
-            bool satisfied
-        )
+        returns (bool satisfied)
     {
         satisfied = _constraints.areAllSatisfied(input, absoluteGasLimit);
     }
 
-    function _requireConstraintsAreSatisfied(bytes memory input, uint256 absoluteGasLimit) internal virtual {
+    function _requireConstraintsAreSatisfied(bytes memory input, uint256 absoluteGasLimit) internal view virtual {
         if (!_areConstraintsAllSatisfied(input, absoluteGasLimit)) {
-            revert ConstraintsNotSatisfied();
+            revert ConstraintsNotAllSatisfied();
         }
     }
 
