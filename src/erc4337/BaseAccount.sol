@@ -8,6 +8,13 @@ import "../lib/types.sol";
 abstract contract BaseAccount is BaseConstraintsManager, ERC4337BaseAccount {
     constructor(address constraintsAdder) BaseConstraintsManager(constraintsAdder) {}
 
+    /**
+     * @dev Validates a user operation and returns validation data.
+     * @param userOp The user operation to validate.
+     * @param userOpHash The hash of the user operation.
+     * @param missingAccountFunds The amount of missing account funds.
+     * @return validationData The validation data.
+     */
     function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
         external
         override
@@ -16,7 +23,6 @@ abstract contract BaseAccount is BaseConstraintsManager, ERC4337BaseAccount {
         _requireFromEntryPoint();
         validationData = _validateSignature(userOp, userOpHash);
         _validateNonce(userOp.nonce);
-        /// @dev new line
         //_requireConstraintsAreSatisfied(abi.encode(userOp), CONSTRAINTS_GAS_LIMIT);
         _payPrefund(missingAccountFunds);
     }

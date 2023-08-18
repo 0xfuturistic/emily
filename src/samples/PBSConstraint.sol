@@ -19,16 +19,29 @@ struct SignedBlock {
     bytes32 signature;
 }
 
+/// @title PBSConstraint
+/// @dev This contract implements a constraint on the commitment of builders by proposers.
+/// Builders are committed to building blocks at specific heights by proposers.
+/// The contract verifies that the builder committed by the proposer is the same as the one in the block.
 contract PBSConstraint {
+    /// @dev Maps a proposer to a mapping of heights to builders.
+    /// buildersCommitted[propser][height] = builder
     mapping(Proposer => mapping(Height => Builder)) public buildersCommitted;
 
+    /// @dev Error message when the builder committed by the proposer is not the same as the one in the block.
     error WrongBuilder();
 
+    /// @dev Allows a proposer to commit a builder to a specific height.
+    /// @param proposer The proposer committing the builder.
+    /// @param height The height the builder is committed to.
+    /// @param builder The builder being committed.
     function commit(Proposer proposer, Height height, Builder builder) external {
         require(msg.sender == Proposer.unwrap(proposer));
         buildersCommitted[proposer][height] = builder;
     }
 
+    /// @dev Validates the commitment of a builder by a proposer.
+    /// @param input The signed block containing the builder's commitment.
     function validateBuilderCommitment(bytes memory input) external view {
         SignedBlock memory signedBlock = abi.decode(input, (SignedBlock));
         Block memory block_ = signedBlock.block_;
