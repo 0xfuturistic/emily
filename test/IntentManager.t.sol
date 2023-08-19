@@ -25,4 +25,14 @@ contract IntentManagerTest is Test {
     function invariant_callSummary() public view {
         handler.callSummary();
     }
+
+    function test_setConstraint(Intent intent, address newAddress, uint256 newSelector) public {
+        function (bytes memory) external view constraint;
+        assembly {
+            constraint.selector := newSelector
+            constraint.address := newAddress
+        }
+        //if (msg.sender != intentManager.owner()) vm.expectRevert();
+        intentManager.setConstraint(intent, constraint);
+    }
 }

@@ -32,11 +32,16 @@ contract IntentManagerHandler is CommonBase, StdCheats, StdUtils {
         intentManager = intentManager_;
     }
 
-    function setConstraint(uint256 actorIndexSeed, Intent intent, function (bytes memory) external view constraint)
+    function setConstraint(uint256 actorIndexSeed, Intent intent, address newAddress, uint256 newSelector)
         public
         countCall("setConstraint")
         useActor(actorIndexSeed)
     {
+        function (bytes memory) external view constraint;
+        assembly {
+            constraint.selector := newSelector
+            constraint.address := newAddress
+        }
         if (currentActor != intentManager.owner()) vm.expectRevert();
         intentManager.setConstraint(intent, constraint);
     }
