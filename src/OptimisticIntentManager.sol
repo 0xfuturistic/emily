@@ -31,17 +31,14 @@ contract OptimisticIntentManager is IntentManager {
 
     constructor(address initialOwner) IntentManager(initialOwner) {}
 
-    function _assertValidity(Intent intent, bytes calldata data) internal override {
-        (, ClaimId claimId) = _makeClaim(intent, data);
+    function assertValidity(bytes calldata data) external override {
+        (Intent intent, bytes memory intentData) = abi.decode(data, (Intent, bytes));
+        (, ClaimId claimId) = _makeClaim(intent, intentData);
         _status[claimId] = ClaimStatus.ACTIVE;
-        super._assertValidity(intent, data);
+        this.assertValidity(data);
     }
 
-    function _makeClaim(Intent intent, bytes calldata data)
-        internal
-        pure
-        returns (Claim memory claim, ClaimId claimId)
-    {
+    function _makeClaim(Intent intent, bytes memory data) internal pure returns (Claim memory claim, ClaimId claimId) {
         claim = Claim({intent: intent, data: data});
         claimId = claim.id();
     }

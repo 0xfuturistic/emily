@@ -13,11 +13,12 @@ contract IntentManager is Ownable {
         _constraints[intent] = constraint;
     }
 
-    function _assertValidity(Intent intent, bytes calldata data) internal virtual {
-        _testConstraints(intent, data);
+    function assertValidity(bytes memory data) external virtual {
+        (Intent intent, bytes memory intentData) = abi.decode(data, (Intent, bytes));
+        _testConstraints(intent, intentData);
     }
 
-    function _testConstraints(Intent intent, bytes calldata data) internal view {
+    function _testConstraints(Intent intent, bytes memory data) internal view {
         _constraints[intent](data);
     }
 }

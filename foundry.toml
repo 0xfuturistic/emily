@@ -13,6 +13,7 @@ remappings = [
     "optimism-contracts/=lib/optimism/packages/contracts-bedrock/src/",
     "uma/core/=lib/uma/packages/core/contracts/",
     "forge-std/=lib/forge-std/src/",
+    "solhooks/=lib/solhooks/src/",
 ]
 
 gas_reports = ["*"]
