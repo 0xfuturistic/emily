@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-import "./IntentManager.sol";
+import "../IntentManager.sol";
 
 contract ERC721ReceiverIntentManager is IERC721Receiver, IntentManager {
     constructor(address initialOwner) IntentManager(initialOwner) {}

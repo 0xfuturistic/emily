@@ -2,10 +2,9 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./lib/types.sol";
 
 contract IntentManager is Ownable {
-    type Intent is bytes32;
-
     mapping(Intent => function (bytes memory) external view) internal _constraints;
 
     constructor(address initialOwner) Ownable(initialOwner) {}

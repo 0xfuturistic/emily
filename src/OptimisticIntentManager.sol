@@ -2,9 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "./IntentManager.sol";
+import "./lib/types.sol";
 
 struct Claim {
-    IntentManager.Intent intent;
+    Intent intent;
     bytes data;
 }
 
