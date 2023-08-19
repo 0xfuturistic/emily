@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./lib/types.sol";
 
 contract IntentManager is Ownable {
+    uint256 constant MAX_GAS_LIMIT = 1000000;
+
     mapping(Intent => function (bytes memory) external view) internal _constraints;
 
     constructor(address initialOwner) Ownable(initialOwner) {}

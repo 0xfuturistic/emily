@@ -2,24 +2,24 @@
 pragma solidity ^0.8.15;
 
 import {BaseAccount as ERC4337BaseAccount, UserOperation} from "erc4337/core/BaseAccount.sol";
+import "solhooks/Hooks.sol";
+import "../IntentManager.sol";
 
-/*
-import {BaseConstraintsManager} from "../BaseConstraintsManager.sol";
-import "../lib/types.sol";
-
-abstract contract BaseAccount is BaseConstraintsManager, ERC4337BaseAccount {
-    constructor(address constraintsAdder) BaseConstraintsManager(constraintsAdder) {}
+abstract contract BaseAccount is ERC4337BaseAccount, IntentManager, Hooks {
+    constructor(address initialOwner) IntentManager(initialOwner) {}
 
     function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
         external
         override
+        preHook(
+            this.assertValidity,
+            abi.encode(
+                abi.encodeWithSelector(this.validateUserOp.selector), abi.encode(userOp, userOpHash, missingAccountFunds)
+            ),
+            MAX_GAS_LIMIT
+        )
         returns (uint256 validationData)
     {
-        _requireFromEntryPoint();
-        validationData = _validateSignature(userOp, userOpHash);
-        _validateNonce(userOp.nonce);
-        //_requireConstraintsAreSatisfied(abi.encode(userOp), CONSTRAINTS_GAS_LIMIT);
-        _payPrefund(missingAccountFunds);
+        validationData = this.validateUserOp(userOp, userOpHash, missingAccountFunds);
     }
 }
-*/

@@ -12,7 +12,8 @@ contract ERC721ReceiverIntentManager is IERC721Receiver, IntentManager, Hooks {
         external
         preHook(
             this.assertValidity,
-            abi.encode(abi.encodeWithSelector(this.onERC721Received.selector, operator, from, tokenId), data)
+            abi.encode(abi.encodeWithSelector(this.onERC721Received.selector, operator, from, tokenId), data),
+            MAX_GAS_LIMIT
         )
         returns (bytes4)
     {
