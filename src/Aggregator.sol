@@ -148,6 +148,8 @@ contract Aggregator is IAggregator {
         return "";
     }
 
+    /// @dev Checks if the user's constraints are satisfied for a given user operation.
+    /// @param userOp The user operation to check constraints for.
     function _assertUserConstraints(UserOperation memory userOp) internal view virtual {
         Constraint[] memory userConstraints = _getUserConstraints(userOp.sender);
         Assignment[] memory assignment = new Assignment[](1);
@@ -155,10 +157,17 @@ contract Aggregator is IAggregator {
         require(_areConstraintsSatisfied(userConstraints, assignment), "userOp violates constraints");
     }
 
-    function _getUserConstraints(address user) internal view virtual returns (Constraint[] memory) {
-        return _userConstraints[user];
+    /// @dev Gets the constraints for a given user.
+    /// @param user The user to get constraints for.
+    /// @return constraints The constraints for the given user.
+    function _getUserConstraints(address user) internal view virtual returns (Constraint[] memory constraints) {
+        constraints = _userConstraints[user];
     }
 
+    /// @dev Checks if the given constraints are satisfied for the given assignment.
+    /// @param constraints The constraints to check.
+    /// @param assignment The assignment to check against.
+    /// @return True if and only if the constraints are satisfied.
     function _areConstraintsSatisfied(Constraint[] memory constraints, Assignment[] memory assignment)
         internal
         view
@@ -174,12 +183,17 @@ contract Aggregator is IAggregator {
         return true;
     }
 
-    function _getConstraintGasLimit(uint256 constraintsCount) internal view returns (uint256) {
-        return UD60x18.unwrap(ud(_getTotalGasLimit()).div(ud(constraintsCount)));
+    /// @dev Gets the gas limit for every constraint given a number of constraints.
+    /// @param constraintsCount The number of constraints.
+    /// @return constraintGasLimit The gas limit for every constraints.
+    function _getConstraintGasLimit(uint256 constraintsCount) internal view returns (uint256 constraintGasLimit) {
+        constraintGasLimit = UD60x18.unwrap(ud(_getTotalGasLimit()).div(ud(constraintsCount)));
     }
 
-    function _getTotalGasLimit() internal view virtual returns (uint256) {
-        return TOTAL_GAS_LIMIT;
+    /// @dev Gets the total gas limit.
+    /// @return totalGasLimit The total gas limit.
+    function _getTotalGasLimit() internal view virtual returns (uint256 totalGasLimit) {
+        totalGasLimit = TOTAL_GAS_LIMIT;
     }
 
     /**
