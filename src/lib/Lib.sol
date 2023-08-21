@@ -17,12 +17,14 @@ library ConstraintsLib {
         view
         returns (bool success)
     {
-        /// @dev If self is empty, self is considered consistent for any assignment and any totalGasLimit.
+        /// @dev If self is empty, self is considered consistent
+        ///      for any assignment and any totalGasLimit.
         if (self.inner.length == 0) {
             return true;
         }
 
-        /// @dev Checks if all the constraints in self are satisfied by the assignment.
+        /// @dev Checks if all the constraints in self are satisfied
+        //       by the assignment.
         uint256 perConstraintGasLimit = totalGasLimit / self.inner.length;
         for (uint256 i = 0; i < self.inner.length; i++) {
             if (!isSatisfied(self.inner[i], assignment, perConstraintGasLimit)) {
@@ -37,11 +39,13 @@ library ConstraintsLib {
         view
         returns (bool success)
     {
-        /// @dev If assignment is not in the scope of self, self is considered satisfied for any totalGasLimit.
+        /// @dev If assignment is not in the scope of self, self is
+        ///      considered satisfied for any totalGasLimit.
         if (self.regionRoot != assignment.regionRoot) {
             return true;
         }
-        /// @dev Evaluates the relation of self at the assignment with constraintGasLimit.
+        /// @dev Evaluates the relation of self at the assignment with
+        ///      constraintGasLimit.
         (success,) = self.relation.address.staticcall{gas: constraintGasLimit}(
             abi.encodeWithSelector(self.relation.selector, assignment)
         );
