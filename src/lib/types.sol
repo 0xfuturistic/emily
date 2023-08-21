@@ -28,3 +28,5 @@ struct ConstraintSet {
 
 using ConstraintsLib for Constraint global;
 using ConstraintsLib for ConstraintSet global;
+
+error UserConstraintsNotSatisfied(address user, bytes32 region, bytes value);

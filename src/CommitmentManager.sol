@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {SD59x18, sd} from "@prb/math/SD59x18.sol";
 import {UD60x18, ud} from "@prb/math/UD60x18.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
+import {Screener} from "./Screener.sol";
 import "./lib/types.sol";
 
 /// @title CommitmentManager
@@ -14,7 +14,6 @@ import "./lib/types.sol";
 contract CommitmentManager is ERC721 {
     uint256 public constant TOTAL_GAS_LIMIT = 50000;
 
-    error UserConstraintsNotSatisfied(address user, bytes32 region, bytes value);
     error OnlyMintingAllowed(address from, address to, uint256 firstTokenId, uint256 batchSize);
 
     mapping(address => ConstraintSet) internal _userConstraints;
