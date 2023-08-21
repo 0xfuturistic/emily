@@ -146,14 +146,14 @@ contract Aggregator is IAggregator {
         return "";
     }
 
-    function _assertUserConstraints(UserOperation memory userOp) internal view {
+    function _assertUserConstraints(UserOperation memory userOp) internal view virtual {
         Constraint[] memory userConstraints = _getUserConstraints(userOp.sender);
         Assignment[] memory assignment = new Assignment[](1);
         assignment[0] = Assignment({row_id: RowId.wrap(uint256(keccak256("UserOperation"))), value: abi.encode(userOp)});
         require(_areConstraintsSatisfied(userConstraints, assignment), "userOp violates constraints");
     }
 
-    function _getUserConstraints(address user) internal view returns (Constraint[] memory) {
+    function _getUserConstraints(address user) internal view virtual returns (Constraint[] memory) {
         return _userConstraints[user];
     }
 
@@ -172,7 +172,7 @@ contract Aggregator is IAggregator {
         return true;
     }
 
-    function _getTotalGasLimit() public pure returns (uint256) {
+    function _getTotalGasLimit() public pure virtual returns (uint256) {
         return TOTAL_GAS_LIMIT;
     }
 
