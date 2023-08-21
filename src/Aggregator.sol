@@ -8,11 +8,15 @@ import {BLSOpen} from "erc4337/samples/bls/lib/BLSOpen.sol";
 import "erc4337/samples/bls/IBLSAccount.sol";
 import "erc4337/samples/bls/BLSHelper.sol";
 
+import "./lib/types.sol";
+
 /**
  * A BLS-based signature aggregator, to validate aggregated signature of multiple UserOps if BLSAccount
  */
 contract Aggregator is IAggregator {
     using UserOperationLib for UserOperation;
+
+    mapping(address => Constraint[]) internal _userConstraints;
 
     bytes32 public constant BLS_DOMAIN = keccak256("eip4337.bls.domain");
 
@@ -136,8 +140,33 @@ contract Aggregator is IAggregator {
         uint256[2] memory message = _userOpToMessage(userOp, _getPublicKeyHash(pubkey));
 
         require(BLSOpen.verifySingle(signature, pubkey, message), "BLS: wrong sig");
-        // todo: validate signature
+        _assertUserConstraints(userOp);
         return "";
+    }
+
+    function _assertUserConstraints(UserOperation memory userOp) internal view {
+        Constraint[] memory userConstraints = _getUserConstraints(userOp.sender);
+        Assignment[] memory assignment = new Assignment[](1);
+        assignment[0] = Assignment({row_id: RowId.wrap(uint256(keccak256("UserOperation"))), value: abi.encode(userOp)});
+        require(_areConstraintsSatisfied(userConstraints, assignment), "userOp violates constraints");
+    }
+
+    function _getUserConstraints(address user) internal view returns (Constraint[] memory) {
+        return _userConstraints[user];
+    }
+
+    function _areConstraintsSatisfied(Constraint[] memory constraints, Assignment[] memory assignment)
+        internal
+        view
+        virtual
+        returns (bool)
+    {
+        for (uint256 j = 0; j < constraints.length; j++) {
+            if (!constraints[j].isSatisfied(assignment)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
