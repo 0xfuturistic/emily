@@ -154,7 +154,7 @@ contract Aggregator is IAggregator {
 
         /// @dev The signature is valid, so we validate the constraints.
         Assignment memory assignment = Assignment({
-            regionRoot: uint256(keccak256("validateUserOpSignature(UserOperation calldata userOp)")),
+            regionRoot: keccak256("validateUserOpSignature(UserOperation calldata userOp)"),
             value: abi.encode(userOp)
         });
         ConstraintSet storage userConstraints = _getUserConstraintSet(userOp.sender);
