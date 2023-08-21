@@ -4,7 +4,7 @@ pragma solidity ^0.8.15;
 import "./types.sol";
 
 /// @title Constraints Library
-/// @dev A library for testing instances of assignments on constraints.
+/// @dev A library for ConstraintSet and Constraint.
 library ConstraintsLib {
     error NotInScope();
 
@@ -17,13 +17,13 @@ library ConstraintsLib {
         view
         returns (bool success)
     {
+        /// @dev If self is empty, self is considered consistent for any assignment and any totalGasLimit.
         if (self.inner.length == 0) {
-            /// @dev If the constraint set is empty, it is vacuously consistent.
             return true;
         }
 
+        /// @dev Checks if all the constraints in self are satisfied by the assignment.
         uint256 perConstraintGasLimit = totalGasLimit / self.inner.length;
-        /// @dev Checks if the assignment is consistent with all constraints in the set.
         for (uint256 i = 0; i < self.inner.length; i++) {
             if (!isSatisfied(self.inner[i], assignment, perConstraintGasLimit)) {
                 return false;
@@ -32,17 +32,18 @@ library ConstraintsLib {
         return true;
     }
 
-    function isSatisfied(Constraint storage self, Assignment memory assignment, uint256 gasLimit)
+    function isSatisfied(Constraint memory self, Assignment memory assignment, uint256 constraintGasLimit)
         public
         view
         returns (bool success)
     {
+        /// @dev If assignment is not in the scope of self, self is considered satisfied for any totalGasLimit.
         if (self.regionRoot != assignment.regionRoot) {
-            /// @dev If the assignment's id is not in scope, the constraint's relation is vacuously satisfied.
             return true;
         }
-        /// @dev Evaluates the constraint's relation at the assignment with the given gas limit.
-        (success,) =
-            self.relation.address.staticcall{gas: gasLimit}(abi.encodeWithSelector(self.relation.selector, assignment));
+        /// @dev Evaluates the relation of self at the assignment with constraintGasLimit.
+        (success,) = self.relation.address.staticcall{gas: constraintGasLimit}(
+            abi.encodeWithSelector(self.relation.selector, assignment)
+        );
     }
 }

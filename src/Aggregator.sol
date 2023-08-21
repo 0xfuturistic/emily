@@ -25,7 +25,7 @@ contract Aggregator is IAggregator {
 
     uint256 public constant TOTAL_GAS_LIMIT = 50000;
 
-    mapping(address => Constraint[]) internal _userConstraints;
+    mapping(address => ConstraintSet) internal _userConstraints;
 
     /**
      * @return publicKey - the public key from a BLS keypair the Aggregator will use to verify this UserOp;
@@ -144,55 +144,33 @@ contract Aggregator is IAggregator {
         uint256[2] memory message = _userOpToMessage(userOp, _getPublicKeyHash(pubkey));
 
         require(BLSOpen.verifySingle(signature, pubkey, message), "BLS: wrong sig");
-        _assertUserConstraints(userOp);
+        _assertUserConstraintSet(userOp);
         return "";
     }
 
     /// @dev Checks if the sender user's constraints are satisfied for a given user operation.
     /// @param userOp The user operation to check constraints for.
-    function _assertUserConstraints(UserOperation memory userOp) internal view virtual {
-        Constraint[] memory userConstraints = _getUserConstraints(userOp.sender);
-        Assignment[] memory assignment = new Assignment[](1);
-        assignment[0] = Assignment({
-            index: uint256(keccak256("_assertUserConstraints(UserOperation memory userOp)")),
-            value: abi.encode(userOp)
-        });
-        require(_areConstraintsSatisfied(userConstraints, assignment), "userOp violates constraints");
+    function _assertUserConstraintSet(UserOperation memory userOp) internal view virtual {
+        ConstraintSet storage userConstraints = _getUserConstraintSet(userOp.sender);
+        Assignment memory assignment =
+            Assignment({regionRoot: uint256(keccak256(abi.encode("userOp"))), value: abi.encode(userOp)});
+        require(
+            userConstraints.isConsistent(assignment, _getPerConstraintGasLimit(userConstraints.inner.length)),
+            "Aggregator: user constraints not satisfied"
+        );
     }
 
     /// @dev Gets the constraints for a given user.
     /// @param user The user to get constraints for.
-    /// @return constraints The constraints for the given user.
-    function _getUserConstraints(address user) internal view virtual returns (Constraint[] memory constraints) {
-        constraints = _userConstraints[user];
-    }
-
-    /// @dev Checks if the given constraints are satisfied for the given assignment.
-    /// @param constraintSet The constraints to check.
-    /// @param assignment The assignment to check against.
-    /// @return satisfied True if and only if the constraints are satisfied.
-    function _areConstraintsSatisfied(ConstraintSet memory constraintSet, Assignment[] memory assignment)
-        internal
-        view
-        virtual
-        returns (bool satisfied)
-    {
-        /// @dev Assume that every element in constraintSet is satisfied.
-        satisfied = true;
-        /// @dev Now, check if there's a contradiction.
-        uint256 constraintGasLimit = _getConstraintGasLimit(constraintSet.inner.length);
-        for (uint256 j = 0; j < constraints.length; j++) {
-            if (!constraints[j].isSatisfied(assignment, constraintGasLimit)) {
-                satisfied = false;
-                break;
-            }
-        }
+    /// @return constraintSet The constraints for the given user.
+    function _getUserConstraintSet(address user) internal view virtual returns (ConstraintSet storage constraintSet) {
+        constraintSet = _userConstraints[user];
     }
 
     /// @dev Gets the gas limit for every constraint given a number of constraints.
     /// @param constraintsCount The number of constraints.
     /// @return constraintGasLimit The gas limit for every constraints.
-    function _getConstraintGasLimit(uint256 constraintsCount) internal view returns (uint256 constraintGasLimit) {
+    function _getPerConstraintGasLimit(uint256 constraintsCount) internal view returns (uint256 constraintGasLimit) {
         constraintGasLimit = UD60x18.unwrap(ud(_getTotalGasLimit()).div(ud(constraintsCount)));
     }
 
