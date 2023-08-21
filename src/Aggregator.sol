@@ -16,12 +16,14 @@ import "./lib/types.sol";
 contract Aggregator is IAggregator {
     using UserOperationLib for UserOperation;
 
-    mapping(address => Constraint[]) internal _userConstraints;
-
     bytes32 public constant BLS_DOMAIN = keccak256("eip4337.bls.domain");
 
     //copied from BLS.sol
     uint256 public constant N = 21888242871839275222246405745257275088696311157297823662689037894645226208583;
+
+    uint256 public constant TOTAL_GAS_LIMIT = 50000;
+
+    mapping(address => Constraint[]) internal _userConstraints;
 
     /**
      * @return publicKey - the public key from a BLS keypair the Aggregator will use to verify this UserOp;
@@ -161,12 +163,17 @@ contract Aggregator is IAggregator {
         virtual
         returns (bool)
     {
+        uint256 constraintGasLimit = _getTotalGasLimit() / constraints.length;
         for (uint256 j = 0; j < constraints.length; j++) {
-            if (!constraints[j].isSatisfied(assignment)) {
+            if (!constraints[j].isSatisfied(assignment, constraintGasLimit)) {
                 return false;
             }
         }
         return true;
+    }
+
+    function _getTotalGasLimit() public pure returns (uint256) {
+        return TOTAL_GAS_LIMIT;
     }
 
     /**
