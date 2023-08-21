@@ -7,6 +7,8 @@ import "erc4337/interfaces/IEntryPoint.sol";
 import {BLSOpen} from "erc4337/samples/bls/lib/BLSOpen.sol";
 import "erc4337/samples/bls/IBLSAccount.sol";
 import "erc4337/samples/bls/BLSHelper.sol";
+import {SD59x18, sd} from "@prb/math/SD59x18.sol";
+import {UD60x18, ud} from "@prb/math/UD60x18.sol";
 
 import "./lib/types.sol";
 
@@ -163,7 +165,7 @@ contract Aggregator is IAggregator {
         virtual
         returns (bool)
     {
-        uint256 constraintGasLimit = _getTotalGasLimit() / constraints.length;
+        uint256 constraintGasLimit = _getConstraintGasLimit(constraints.length);
         for (uint256 j = 0; j < constraints.length; j++) {
             if (!constraints[j].isSatisfied(assignment, constraintGasLimit)) {
                 return false;
@@ -172,7 +174,11 @@ contract Aggregator is IAggregator {
         return true;
     }
 
-    function _getTotalGasLimit() public pure virtual returns (uint256) {
+    function _getConstraintGasLimit(uint256 constraintsCount) internal view returns (uint256) {
+        return UD60x18.unwrap(ud(_getTotalGasLimit()).div(ud(constraintsCount)));
+    }
+
+    function _getTotalGasLimit() internal view virtual returns (uint256) {
         return TOTAL_GAS_LIMIT;
     }
 
