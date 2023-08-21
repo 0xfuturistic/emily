@@ -7,15 +7,22 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 import "./lib/types.sol";
 
+/// @title CommitmentManager
+/// @dev This contract manages commitments as ERC721 tokens. It allows users
+//       to mint constraints as commitments and enforces user-defined constraints
+///      on token transfers.
 contract CommitmentManager is ERC721 {
     uint256 public constant TOTAL_GAS_LIMIT = 50000;
+
+    error UserConstraintsNotSatisfied(address user, bytes32 region, bytes value);
+    error OnlyMintingAllowed(address from, address to, uint256 firstTokenId, uint256 batchSize);
 
     mapping(address => ConstraintSet) internal _userConstraints;
 
     constructor() ERC721("", "") {}
 
     modifier Screen(address user, bytes32 region, bytes memory value) {
-        require(screen(user, region, value), "Aggregator: user constraints not satisfied");
+        if (!screen(user, region, value)) revert UserConstraintsNotSatisfied(user, region, value);
         _;
     }
 
@@ -23,12 +30,13 @@ contract CommitmentManager is ERC721 {
         /// @dev Validate that userOp satisfies the constraints of the userOp sender
         ConstraintSet storage userConstraints = _getUserConstraintSet(user);
         return userConstraints.isConsistent(
-            Assignment({regionRoot: keccak256(abi.encodePacked(region)), value: value}),
-            _getPerConstraintGasLimit(userConstraints.inner.length)
+            Assignment({regionRoot: region, value: value}), _getPerConstraintGasLimit(userConstraints.inner.length)
         );
     }
 
-    function mint(Constraint memory constraint) public Screen(msg.sender, this.mint.selector, abi.encode(constraint)) {
+    /// @dev Mint a constraint as a commitment for message sender.
+    /// @param constraint The constraint to be minted.
+    function mint(Constraint memory constraint) public {
         uint256 constraintId = uint256(keccak256(abi.encode(msg.sender, constraint)));
         _mint(msg.sender, constraintId);
         _userConstraints[msg.sender].add(constraint);
@@ -41,7 +49,8 @@ contract CommitmentManager is ERC721 {
         constraintSet = _userConstraints[user];
     }
 
-    /// @dev Gets the gas limit for every constraint given a number of constraints.
+    /// @dev Gets the gas limit for every constraint given a number
+    ///      of constraints.
     /// @param constraintsCount The number of constraints.
     /// @return constraintGasLimit The gas limit for every constraints.
     function _getPerConstraintGasLimit(uint256 constraintsCount) internal view returns (uint256 constraintGasLimit) {
@@ -52,5 +61,28 @@ contract CommitmentManager is ERC721 {
     /// @return totalGasLimit The total gas limit.
     function _getTotalGasLimit() internal view virtual returns (uint256 totalGasLimit) {
         totalGasLimit = TOTAL_GAS_LIMIT;
+    }
+
+    /// @dev Hook that is called before any token transfer. Reverts
+    //       if the transfer is not a minting operation. Additionally,
+    ///      reverts if the transfer does not satisfy the user's
+    ///      constraints.
+    /// @param from Address sending the tokens.
+    /// @param to Address receiving the tokens.
+    /// @param firstTokenId ID of the first token being transferred.
+    /// @param batchSize Number of tokens being transferred.
+    function _beforeTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize)
+        internal
+        override
+        Screen(
+            from,
+            bytes4(keccak256("_beforeTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize)")),
+            abi.encode(from, to, firstTokenId, batchSize)
+        )
+    {
+        if (from != address(0)) {
+            revert OnlyMintingAllowed(from, to, firstTokenId, batchSize);
+        }
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
     }
 }
