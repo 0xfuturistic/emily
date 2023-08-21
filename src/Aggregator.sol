@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: MIT
 pragma solidity >=0.8.4 <0.9.0;
 pragma abicoder v2;
 
@@ -7,25 +7,21 @@ import "erc4337/interfaces/IEntryPoint.sol";
 import {BLSOpen} from "erc4337/samples/bls/lib/BLSOpen.sol";
 import "erc4337/samples/bls/IBLSAccount.sol";
 import "erc4337/samples/bls/BLSHelper.sol";
-import {SD59x18, sd} from "@prb/math/SD59x18.sol";
-import {UD60x18, ud} from "@prb/math/UD60x18.sol";
+
+import {CommitmentManager} from "./CommitmentManager.sol";
 
 import "./lib/types.sol";
 
 /**
  * A BLS-based signature aggregator, to validate aggregated signature of multiple UserOps if BLSAccount
  */
-contract Aggregator is IAggregator {
+contract Aggregator is IAggregator, CommitmentManager {
     using UserOperationLib for UserOperation;
 
     bytes32 public constant BLS_DOMAIN = keccak256("eip4337.bls.domain");
 
     //copied from BLS.sol
     uint256 public constant N = 21888242871839275222246405745257275088696311157297823662689037894645226208583;
-
-    uint256 public constant TOTAL_GAS_LIMIT = 50000;
-
-    mapping(address => ConstraintSet) internal _userConstraints;
 
     /**
      * @return publicKey - the public key from a BLS keypair the Aggregator will use to verify this UserOp;
@@ -145,47 +141,18 @@ contract Aggregator is IAggregator {
      *    (usually empty, unless account and aggregator support some kind of "multisig"
      */
 
-    function validateUserOpSignature(UserOperation calldata userOp) external view returns (bytes memory sigForUserOp) {
+    function validateUserOpSignature(UserOperation calldata userOp)
+        external
+        view
+        Screen(userOp.sender, this.validateUserOpSignature.selector, abi.encode(userOp))
+        returns (bytes memory sigForUserOp)
+    {
         uint256[2] memory signature = abi.decode(userOp.signature, (uint256[2]));
         uint256[4] memory pubkey = getUserOpPublicKey(userOp);
         uint256[2] memory message = _userOpToMessage(userOp, _getPublicKeyHash(pubkey));
 
         require(BLSOpen.verifySingle(signature, pubkey, message), "BLS: wrong sig");
-
-        /// @dev Validate that userOp satisfies the constraints of the userOp sender
-        ConstraintSet storage userConstraints = _getUserConstraintSet(userOp.sender);
-        require(
-            userConstraints.isConsistent(
-                Assignment({
-                    regionRoot: keccak256("validateUserOpSignature(UserOperation calldata userOp)"),
-                    value: abi.encode(userOp)
-                }),
-                _getPerConstraintGasLimit(userConstraints.inner.length)
-            ),
-            "Aggregator: user constraints not satisfied"
-        );
-
         return "";
-    }
-
-    /// @dev Gets the constraints for a given user.
-    /// @param user The user to get constraints for.
-    /// @return constraintSet The constraints for the given user.
-    function _getUserConstraintSet(address user) internal view virtual returns (ConstraintSet storage constraintSet) {
-        constraintSet = _userConstraints[user];
-    }
-
-    /// @dev Gets the gas limit for every constraint given a number of constraints.
-    /// @param constraintsCount The number of constraints.
-    /// @return constraintGasLimit The gas limit for every constraints.
-    function _getPerConstraintGasLimit(uint256 constraintsCount) internal view returns (uint256 constraintGasLimit) {
-        constraintGasLimit = UD60x18.unwrap(ud(_getTotalGasLimit()).div(ud(constraintsCount)));
-    }
-
-    /// @dev Gets the total gas limit.
-    /// @return totalGasLimit The total gas limit.
-    function _getTotalGasLimit() internal view virtual returns (uint256 totalGasLimit) {
-        totalGasLimit = TOTAL_GAS_LIMIT;
     }
 
     /**
