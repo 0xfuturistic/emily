@@ -3,9 +3,6 @@ pragma solidity ^0.8.15;
 
 import "./types.sol";
 
-using EnumerableSet for EnumerableSet.Bytes32Set;
-using EnumerableSet for EnumerableSet.UintSet;
-
 /// @title Constraints Library
 /// @dev A library for testing instances of assignments on constraints.
 library ConstraintsLib {
