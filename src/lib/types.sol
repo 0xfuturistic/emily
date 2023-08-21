@@ -18,4 +18,8 @@ struct Constraint {
     function (bytes memory) external view returns(bool) relation;
 }
 
+struct ConstraintSet {
+    Constraint[] inner;
+}
+
 using ConstraintsLib for Constraint global;
