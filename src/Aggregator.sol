@@ -152,14 +152,16 @@ contract Aggregator is IAggregator {
 
         require(BLSOpen.verifySingle(signature, pubkey, message), "BLS: wrong sig");
 
-        /// @dev The signature is valid, so we validate the constraints.
-        Assignment memory assignment = Assignment({
-            regionRoot: keccak256("validateUserOpSignature(UserOperation calldata userOp)"),
-            value: abi.encode(userOp)
-        });
+        /// @dev Validate that userOp satisfies the constraints of the userOp sender
         ConstraintSet storage userConstraints = _getUserConstraintSet(userOp.sender);
         require(
-            userConstraints.isConsistent(assignment, _getPerConstraintGasLimit(userConstraints.inner.length)),
+            userConstraints.isConsistent(
+                Assignment({
+                    regionRoot: keccak256("validateUserOpSignature(UserOperation calldata userOp)"),
+                    value: abi.encode(userOp)
+                }),
+                _getPerConstraintGasLimit(userConstraints.inner.length)
+            ),
             "Aggregator: user constraints not satisfied"
         );
 
