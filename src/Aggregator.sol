@@ -148,7 +148,7 @@ contract Aggregator is IAggregator {
         return "";
     }
 
-    /// @dev Checks if the user's constraints are satisfied for a given user operation.
+    /// @dev Checks if the sender user's constraints are satisfied for a given user operation.
     /// @param userOp The user operation to check constraints for.
     function _assertUserConstraints(UserOperation memory userOp) internal view virtual {
         Constraint[] memory userConstraints = _getUserConstraints(userOp.sender);
