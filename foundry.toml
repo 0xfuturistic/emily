@@ -7,4 +7,5 @@ remappings = [
     "ds-test/=lib/forge-std/lib/ds-test/src/",
     "erc4337/=lib/erc4337/contracts/",
     "forge-std/=lib/forge-std/src/",
+    "@prb/math/=lib/prb-math/src/",
 ]
