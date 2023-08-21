@@ -153,7 +153,10 @@ contract Aggregator is IAggregator {
     function _assertUserConstraints(UserOperation memory userOp) internal view virtual {
         Constraint[] memory userConstraints = _getUserConstraints(userOp.sender);
         Assignment[] memory assignment = new Assignment[](1);
-        assignment[0] = Assignment({row_id: RowId.wrap(uint256(keccak256("UserOperation"))), value: abi.encode(userOp)});
+        assignment[0] = Assignment({
+            index: uint256(keccak256("_assertUserConstraints(UserOperation memory userOp)")),
+            value: abi.encode(userOp)
+        });
         require(_areConstraintsSatisfied(userConstraints, assignment), "userOp violates constraints");
     }
 
@@ -165,22 +168,25 @@ contract Aggregator is IAggregator {
     }
 
     /// @dev Checks if the given constraints are satisfied for the given assignment.
-    /// @param constraints The constraints to check.
+    /// @param constraintSet The constraints to check.
     /// @param assignment The assignment to check against.
-    /// @return True if and only if the constraints are satisfied.
-    function _areConstraintsSatisfied(Constraint[] memory constraints, Assignment[] memory assignment)
+    /// @return satisfied True if and only if the constraints are satisfied.
+    function _areConstraintsSatisfied(ConstraintSet memory constraintSet, Assignment[] memory assignment)
         internal
         view
         virtual
-        returns (bool)
+        returns (bool satisfied)
     {
-        uint256 constraintGasLimit = _getConstraintGasLimit(constraints.length);
+        /// @dev Assume that every element in constraintSet is satisfied.
+        satisfied = true;
+        /// @dev Now, check if there's a contradiction.
+        uint256 constraintGasLimit = _getConstraintGasLimit(constraintSet.inner.length);
         for (uint256 j = 0; j < constraints.length; j++) {
             if (!constraints[j].isSatisfied(assignment, constraintGasLimit)) {
-                return false;
+                satisfied = false;
+                break;
             }
         }
-        return true;
     }
 
     /// @dev Gets the gas limit for every constraint given a number of constraints.

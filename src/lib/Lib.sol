@@ -3,43 +3,49 @@ pragma solidity ^0.8.15;
 
 import "./types.sol";
 
+using EnumerableSet for EnumerableSet.Bytes32Set;
+using EnumerableSet for EnumerableSet.UintSet;
+
 /// @title Constraints Library
 /// @dev A library for testing instances of assignments on constraints.
 library ConstraintsLib {
     error NotInScope();
 
-    /// @dev Tests that an instance in the scope of a constraint satisfies the constraint.
-    /// @param self Constraint
-    /// @param instance Instance to test
-    /// @param gasLimit Gas limit for evaluating the constraint
-    /// @return success Whether the test passed (iff constraint is satisfied).
-    function isSatisfied(Constraint memory self, Assignment[] memory instance, uint256 gasLimit)
+    function add(ConstraintSet storage self, Constraint memory constraint) public {
+        self.inner.push(constraint);
+    }
+
+    function isConsistent(ConstraintSet storage self, Assignment memory assignment, uint256 totalGasLimit)
         public
         view
         returns (bool success)
     {
-        if (!inScope(self, instance)) {
-            /// @dev Assumption violated.
-            revert NotInScope();
+        if (self.inner.length == 0) {
+            /// @dev If the constraint set is empty, it is vacuously consistent.
+            return true;
         }
-        /// @dev Test whether the constraint's relation holds for the instance for the given gas limit.
-        (success,) =
-            self.relation.address.staticcall{gas: gasLimit}(abi.encodeWithSelector(self.relation.selector, instance));
-    }
 
-    /// @dev Checks whether an instance is in the scope of the constraint.
-    /// @param self Constraint
-    /// @param instance Instance to check
-    /// @return isInScope Whether the instance is in scope
-    function inScope(Constraint memory self, Assignment[] memory instance) public pure returns (bool isInScope) {
-        /// @dev Assume that the instance is in scope.
-        isInScope = true;
-        /// @dev Now check if there's a contradiction.
-        for (uint256 i = 0; i < self.indicesInScope.length; i++) {
-            if (self.indicesInScope[i] != instance[i].index) {
-                isInScope = false;
-                break;
+        uint256 perConstraintGasLimit = totalGasLimit / self.inner.length;
+        /// @dev Checks if the assignment is consistent with all constraints in the set.
+        for (uint256 i = 0; i < self.inner.length; i++) {
+            if (!isSatisfied(self.inner[i], assignment, perConstraintGasLimit)) {
+                return false;
             }
         }
+        return true;
+    }
+
+    function isSatisfied(Constraint storage self, Assignment memory assignment, uint256 gasLimit)
+        public
+        view
+        returns (bool success)
+    {
+        if (self.regionRoot != assignment.regionRoot) {
+            /// @dev If the assignment's id is not in scope, the constraint's relation is vacuously satisfied.
+            return true;
+        }
+        /// @dev Evaluates the constraint's relation at the assignment with the given gas limit.
+        (success,) =
+            self.relation.address.staticcall{gas: gasLimit}(abi.encodeWithSelector(self.relation.selector, assignment));
     }
 }
