@@ -8,4 +8,5 @@ remappings = [
     "erc4337/=lib/erc4337/contracts/",
     "forge-std/=lib/forge-std/src/",
     "@prb/math/=lib/prb-math/src/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
 ]
