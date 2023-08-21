@@ -4,3 +4,6 @@
 [submodule "lib/erc4337"]
 	path = lib/erc4337
 	url = https://github.com/eth-infinitism/account-abstraction/
+[submodule "lib/prb-math"]
+	path = lib/prb-math
+	url = https://github.com/PaulRBerg/prb-math
