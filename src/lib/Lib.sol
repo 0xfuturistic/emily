@@ -3,16 +3,16 @@ pragma solidity ^0.8.15;
 
 import "./types.sol";
 
-/// @title Constraints Library
-/// @dev A library for ConstraintSet and Constraint.
-library ConstraintsLib {
+/// @title Commitments Library
+/// @dev A library for CommitmentSet and Commitment.
+library CommitmentsLib {
     error NotInScope();
 
-    function add(ConstraintSet storage self, Constraint memory constraint) public {
-        self.inner.push(constraint);
+    function add(CommitmentSet storage self, Commitment memory commitment) public {
+        self.inner.push(commitment);
     }
 
-    function isConsistent(ConstraintSet storage self, Assignment memory assignment, uint256 totalGasLimit)
+    function isConsistent(CommitmentSet storage self, Assignment memory assignment, uint256 totalGasLimit)
         public
         view
         returns (bool success)
@@ -23,30 +23,30 @@ library ConstraintsLib {
             return true;
         }
 
-        /// @dev Checks if all the constraints in self are satisfied
+        /// @dev Checks if all the commitments in self are satisfied
         //       by the assignment.
-        uint256 perConstraintGasLimit = totalGasLimit / self.inner.length;
+        uint256 perCommitmentGasLimit = totalGasLimit / self.inner.length;
         for (uint256 i = 0; i < self.inner.length; i++) {
-            if (!isSatisfied(self.inner[i], assignment, perConstraintGasLimit)) {
+            if (!isSatisfied(self.inner[i], assignment, perCommitmentGasLimit)) {
                 return false;
             }
         }
         return true;
     }
 
-    function isSatisfied(Constraint memory self, Assignment memory assignment, uint256 constraintGasLimit)
+    function isSatisfied(Commitment memory self, Assignment memory assignment, uint256 commitmentGasLimit)
         public
         view
         returns (bool success)
     {
         /// @dev If assignment is not in the scope of self, self is
         ///      considered satisfied for any totalGasLimit.
-        if (self.regionRoot != assignment.regionRoot) {
+        if (self.domainRoot != assignment.domainRoot) {
             return true;
         }
         /// @dev Evaluates the relation of self at the assignment with
-        ///      constraintGasLimit.
-        (success,) = self.relation.address.staticcall{gas: constraintGasLimit}(
+        ///      commitmentGasLimit.
+        (success,) = self.relation.address.staticcall{gas: commitmentGasLimit}(
             abi.encodeWithSelector(self.relation.selector, assignment)
         );
     }
