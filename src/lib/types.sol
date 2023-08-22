@@ -9,7 +9,7 @@ struct Commitment {
     /// @dev The relation is defined intensionally by a formula.
     ///      The domain is an instance (an assignment of values)
     //       but here we define it more generally as a bytes array.
-    function (bytes memory) external view returns(bool) relation;
+    function (bytes memory) external view relation;
 }
 
 struct CommitmentSet {
