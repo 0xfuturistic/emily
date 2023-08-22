@@ -3,16 +3,6 @@ pragma solidity ^0.8.15;
 
 import "./Lib.sol";
 
-/// @dev An assignment of a value to a domain.
-struct Assignment {
-    bytes32 domainRoot;
-    bytes value;
-}
-
-struct AssignmentSet {
-    Assignment[] inner;
-}
-
 /// @dev A commitment is a relation defined on a domain.
 struct Commitment {
     bytes32 domainRoot;
@@ -24,6 +14,12 @@ struct Commitment {
 
 struct CommitmentSet {
     Commitment[] inner;
+}
+
+/// @dev An assignment of a value on a domain.
+struct Assignment {
+    bytes32 domainRoot;
+    bytes value;
 }
 
 using CommitmentSetLib for CommitmentSet global;
