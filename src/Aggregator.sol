@@ -126,12 +126,6 @@ contract Aggregator is IAggregator, CommitmentManager {
         return keccak256(abi.encode(publicKey));
     }
 
-    /// @dev Adds a constraint to the sender's constraint set.
-    /// @param constraint The constraint to add
-    function add(Constraint memory constraint) external {
-        _userConstraints[msg.sender].add(constraint);
-    }
-
     /**
      * validate signature of a single userOp
      * This method is called after EntryPoint.simulateValidation() returns an aggregator.

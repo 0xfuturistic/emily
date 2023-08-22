@@ -12,7 +12,7 @@ contract Screener {
     }
 
     modifier Screen(address user, bytes32 region, bytes memory value) {
-        if (!screen(user, region, value)) revert UserConstraintsNotSatisfied(user, region, value);
+        if (!screen(user, region, value)) revert UserCommitmentsNotSatisfied(user, region, value);
         _;
     }
 

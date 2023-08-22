@@ -9,51 +9,53 @@ import "./lib/types.sol";
 
 /// @title CommitmentManager
 /// @dev This contract manages commitments as ERC721 tokens. It allows users
-//       to mint constraints as commitments and enforces user-defined constraints
+//       to mint commitments as commitments and enforces user-defined commitments
 ///      on token transfers.
 contract CommitmentManager is ERC721 {
     uint256 public constant TOTAL_GAS_LIMIT = 50000;
 
     error OnlyMintingAllowed(address from, address to, uint256 firstTokenId, uint256 batchSize);
 
-    mapping(address => ConstraintSet) internal _userConstraints;
+    mapping(address => CommitmentSet) internal _userCommitments;
 
     constructor() ERC721("", "") {}
 
     modifier Screen(address user, bytes32 region, bytes memory value) {
-        if (!screen(user, region, value)) revert UserConstraintsNotSatisfied(user, region, value);
+        if (!screen(user, region, value)) revert UserCommitmentsNotSatisfied(user, region, value);
         _;
     }
 
-    function screen(address user, bytes32 region, bytes memory value) public view returns (bool success) {
-        /// @dev Validate that userOp satisfies the constraints of the userOp sender
-        ConstraintSet storage userConstraints = _getUserConstraintSet(user);
-        return userConstraints.isConsistent(
-            Assignment({regionRoot: region, value: value}), _getPerConstraintGasLimit(userConstraints.inner.length)
+    function screen(address user, bytes32 domain, bytes memory value) public view returns (bool success) {
+        /// @dev Validate that userOp satisfies the commitments of the userOp sender
+        CommitmentSet storage userCommitments = _getUserCommitmentSet(user);
+        return userCommitments.isSatisfied(
+            Assignment({domainRoot: domain, value: value}), _getPerCommitmentGasLimit(userCommitments.inner.length)
         );
     }
 
-    /// @dev Mint a constraint as a commitment for message sender.
-    /// @param constraint The constraint to be minted.
-    function mint(Constraint memory constraint) public {
-        uint256 constraintId = uint256(keccak256(abi.encode(msg.sender, constraint)));
-        _mint(msg.sender, constraintId);
-        _userConstraints[msg.sender].add(constraint);
+    /// @dev Mint a commitment for the message sender.
+    /// @param commitment The commitment to be minted.
+    function mint(Commitment memory commitment) public {
+        uint256 commitmentId = uint256(keccak256(abi.encode(msg.sender, commitment)));
+        _mint(msg.sender, commitmentId);
+        /// @dev Wrap the commitment in a CommitmentSet and add it to the user's commitments.
+        CommitmentSet memory commitmentSet = CommitmentSetLib.wrap(commitment);
+        _userCommitments[msg.sender].add(commitmentSet);
     }
 
-    /// @dev Gets the constraints for a given user.
-    /// @param user The user to get constraints for.
-    /// @return constraintSet The constraints for the given user.
-    function _getUserConstraintSet(address user) internal view virtual returns (ConstraintSet storage constraintSet) {
-        constraintSet = _userConstraints[user];
+    /// @dev Gets the commitments for a given user.
+    /// @param user The user to get commitments for.
+    /// @return commitmentSet The commitments for the given user.
+    function _getUserCommitmentSet(address user) internal view virtual returns (CommitmentSet storage commitmentSet) {
+        commitmentSet = _userCommitments[user];
     }
 
-    /// @dev Gets the gas limit for every constraint given a number
-    ///      of constraints.
-    /// @param constraintsCount The number of constraints.
-    /// @return constraintGasLimit The gas limit for every constraints.
-    function _getPerConstraintGasLimit(uint256 constraintsCount) internal view returns (uint256 constraintGasLimit) {
-        constraintGasLimit = UD60x18.unwrap(ud(_getTotalGasLimit()).div(ud(constraintsCount)));
+    /// @dev Gets the gas limit for every commitment given a number
+    ///      of commitments.
+    /// @param commitmentsCount The number of commitments.
+    /// @return commitmentGasLimit The gas limit for every commitments.
+    function _getPerCommitmentGasLimit(uint256 commitmentsCount) internal view returns (uint256 commitmentGasLimit) {
+        commitmentGasLimit = UD60x18.unwrap(ud(_getTotalGasLimit()).div(ud(commitmentsCount)));
     }
 
     /// @dev Gets the total gas limit.
@@ -65,7 +67,7 @@ contract CommitmentManager is ERC721 {
     /// @dev Hook that is called before any token transfer. Reverts
     //       if the transfer is not a minting operation. Additionally,
     ///      reverts if the transfer does not satisfy the user's
-    ///      constraints.
+    ///      commitments.
     /// @param from Address sending the tokens.
     /// @param to Address receiving the tokens.
     /// @param firstTokenId ID of the first token being transferred.

@@ -26,7 +26,6 @@ struct CommitmentSet {
     Commitment[] inner;
 }
 
-using CommitmentsLib for Commitment global;
-using CommitmentsLib for CommitmentSet global;
+using CommitmentSetLib for CommitmentSet global;
 
 error UserCommitmentsNotSatisfied(address user, bytes32 region, bytes value);
