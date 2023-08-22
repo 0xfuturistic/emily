@@ -6,16 +6,26 @@ import "./types.sol";
 /// @title CommitmentSet Library
 /// @dev A library for CommitmentSet.
 library CommitmentSetLib {
-    function identity() public pure returns (CommitmentSet memory) {
-        return CommitmentSet(new Commitment[](0));
+    /// @dev Returns an empty CommitmentSet.
+    /// @return set An empty CommitmentSet.
+    function identity() public pure returns (CommitmentSet memory set) {
+        set = CommitmentSet(new Commitment[](0));
     }
 
+    /// @dev Adds a CommitmentSet to another CommitmentSet.
+    /// @param self The CommitmentSet to add to.
+    /// @param set The CommitmentSet to add.
     function add(CommitmentSet storage self, CommitmentSet memory set) internal {
         for (uint256 i = 0; i < set.inner.length; i++) {
             self.inner.push(set.inner[i]);
         }
     }
 
+    /// @dev Checks if a CommitmentSet is satisfied by an Assignment.
+    /// @param self The CommitmentSet to check.
+    /// @param assignment The Assignment to check against.
+    /// @param gasLimit The gas limit for the operation.
+    /// @return True if the CommitmentSet is satisfied, false otherwise.
     function isSatisfied(CommitmentSet storage self, Assignment memory assignment, uint256 gasLimit)
         public
         view
@@ -27,8 +37,8 @@ library CommitmentSetLib {
             return true;
         }
 
-        /// @dev Checks if all the commitments in self are satisfied
-        //       by the assignment.
+        /// @dev Checks if all the commitments in self are satisfied by
+        //       the assignment
         uint256 perCommitmentGasLimit = gasLimit / self.inner.length;
         for (uint256 i = 0; i < self.inner.length; i++) {
             /// @dev If assignment is not in the domain of the commitment, the
@@ -49,6 +59,9 @@ library CommitmentSetLib {
         return true;
     }
 
+    /// @dev Wraps a Commitment in a CommitmentSet.
+    /// @param commitment The Commitment to wrap.
+    /// @return  set CommitmentSet containing the given Commitment.
     function wrap(Commitment memory commitment) public pure returns (CommitmentSet memory set) {
         set = CommitmentSet(new Commitment[](1));
         set.inner[0] = commitment;
