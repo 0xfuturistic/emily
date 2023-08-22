@@ -11,12 +11,12 @@ contract Screener {
         commitmentManager = CommitmentManager(commitmentManagerAddress);
     }
 
-    modifier Screen(address user, bytes32 region, bytes memory value) {
-        if (!screen(user, region, value)) revert UserCommitmentsNotSatisfied(user, region, value);
+    modifier Screen(address user, bytes32 domain, bytes memory value) {
+        if (!screen(user, domain, value)) revert UserCommitmentsNotSatisfied(user, domain, value);
         _;
     }
 
-    function screen(address user, bytes32 region, bytes memory value) public view virtual returns (bool success) {
-        success = commitmentManager.screen(user, region, value);
+    function screen(address user, bytes32 domain, bytes memory value) public view virtual returns (bool success) {
+        success = commitmentManager.screen(user, domain, value);
     }
 }

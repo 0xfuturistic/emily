@@ -20,8 +20,8 @@ contract CommitmentManager is ERC721 {
 
     constructor() ERC721("", "") {}
 
-    modifier Screen(address user, bytes32 region, bytes memory value) {
-        if (!screen(user, region, value)) revert UserCommitmentsNotSatisfied(user, region, value);
+    modifier Screen(address user, bytes32 domain, bytes memory value) {
+        if (!screen(user, domain, value)) revert UserCommitmentsNotSatisfied(user, domain, value);
         _;
     }
 

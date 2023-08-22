@@ -3,7 +3,7 @@ pragma solidity ^0.8.15;
 
 import "./Lib.sol";
 
-/// @dev An assignment of a value to a region.
+/// @dev An assignment of a value to a domain.
 struct Assignment {
     bytes32 domainRoot;
     bytes value;
@@ -28,4 +28,4 @@ struct CommitmentSet {
 
 using CommitmentSetLib for CommitmentSet global;
 
-error UserCommitmentsNotSatisfied(address user, bytes32 region, bytes value);
+error UserCommitmentsNotSatisfied(address user, bytes32 domain, bytes value);
