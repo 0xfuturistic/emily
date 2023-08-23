@@ -3,6 +3,8 @@ pragma solidity ^0.8.15;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
+/// @title SoulboundERC721
+/// @dev Extension of ERC721 that only allows minting.
 contract SoulboundERC721 is ERC721 {
     error OnlyMintingAllowed(address from, address to, uint256 firstTokenId, uint256 batchSize);
 
