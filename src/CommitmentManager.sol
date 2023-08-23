@@ -1,36 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.15;
 
-import {SD59x18, sd} from "@prb/math/SD59x18.sol";
-import {UD60x18, ud} from "@prb/math/UD60x18.sol";
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {Screener} from "./Screener.sol";
+import {SoulboundERC721} from "./SoulboundERC721.sol";
 import "./lib/types.sol";
 
 /// @title CommitmentManager
-/// @dev This contract manages commitments as ERC721 tokens. It allows users
+/// @dev This contract manages commitments as soul-bound ERC721 tokens. It allows users
 //       to mint commitments as commitments and enforces user-defined commitments
 ///      on token transfers.
-contract CommitmentManager is ERC721 {
-    uint256 public constant TOTAL_GAS_LIMIT = 50000;
-
-    error OnlyMintingAllowed(address from, address to, uint256 firstTokenId, uint256 batchSize);
+contract CommitmentManager is SoulboundERC721 {
+    uint256 public immutable USER_COMMITMENTS_GAS_LIMIT;
 
     mapping(address => CommitmentSet) internal _userCommitments;
 
-    constructor() ERC721("", "") {}
-
-    modifier Screen(address user, bytes32 domain, bytes memory value) {
-        if (!screen(user, domain, value)) revert UserCommitmentsNotSatisfied(user, domain, value);
-        _;
-    }
-
-    function screen(address user, bytes32 domain, bytes memory value) public view returns (bool success) {
-        /// @dev Validate that userOp satisfies the commitments of the userOp sender
-        CommitmentSet storage userCommitments = _getUserCommitmentSet(user);
-        return userCommitments.isSatisfied(
-            Assignment({domainRoot: domain, value: value}), _getPerCommitmentGasLimit(userCommitments.inner.length)
-        );
+    constructor(uint256 userCommitmentsGasLimit) SoulboundERC721("", "") {
+        USER_COMMITMENTS_GAS_LIMIT = userCommitmentsGasLimit;
     }
 
     /// @dev Mint a commitment for msg.sender.
@@ -43,47 +27,24 @@ contract CommitmentManager is ERC721 {
         _userCommitments[msg.sender].add(commitmentSet);
     }
 
+    /// @dev Checks if the commitments of a user are satisfied for a given domain and value.
+    /// @param user The address of the user whose commitments are being checked.
+    /// @param domain The domain of the commitment being checked.
+    /// @param value The value of the commitment being checked.
+    /// @return True if and only if the user's commitments are satisfied.
+    function areUserCommitmentsSatisfied(address user, bytes32 domain, bytes memory value)
+        external
+        view
+        returns (bool)
+    {
+        CommitmentSet storage userCommitments = _getUserCommitmentSet(user);
+        return userCommitments.isSatisfied(Assignment({domainRoot: domain, value: value}), USER_COMMITMENTS_GAS_LIMIT);
+    }
+
     /// @dev Gets the commitments for a given user.
     /// @param user The user to get commitments for.
     /// @return commitmentSet The commitments for the given user.
     function _getUserCommitmentSet(address user) internal view virtual returns (CommitmentSet storage commitmentSet) {
         commitmentSet = _userCommitments[user];
-    }
-
-    /// @dev Gets the gas limit for every commitment given a number
-    ///      of commitments.
-    /// @param commitmentsCount The number of commitments.
-    /// @return commitmentGasLimit The gas limit for every commitments.
-    function _getPerCommitmentGasLimit(uint256 commitmentsCount) internal view returns (uint256 commitmentGasLimit) {
-        commitmentGasLimit = UD60x18.unwrap(ud(_getTotalGasLimit()).div(ud(commitmentsCount)));
-    }
-
-    /// @dev Gets the total gas limit.
-    /// @return totalGasLimit The total gas limit.
-    function _getTotalGasLimit() internal view virtual returns (uint256 totalGasLimit) {
-        totalGasLimit = TOTAL_GAS_LIMIT;
-    }
-
-    /// @dev Hook that is called before any token transfer. Reverts
-    //       if the transfer is not a minting operation. Additionally,
-    ///      reverts if the transfer does not satisfy the user's
-    ///      commitments.
-    /// @param from Address sending the tokens.
-    /// @param to Address receiving the tokens.
-    /// @param firstTokenId ID of the first token being transferred.
-    /// @param batchSize Number of tokens being transferred.
-    function _beforeTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize)
-        internal
-        override
-        Screen(
-            from,
-            bytes4(keccak256("_beforeTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize)")),
-            abi.encode(from, to, firstTokenId, batchSize)
-        )
-    {
-        if (from != address(0)) {
-            revert OnlyMintingAllowed(from, to, firstTokenId, batchSize);
-        }
-        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
     }
 }

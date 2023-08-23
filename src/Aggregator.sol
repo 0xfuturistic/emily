@@ -8,20 +8,22 @@ import {BLSOpen} from "erc4337/samples/bls/lib/BLSOpen.sol";
 import "erc4337/samples/bls/IBLSAccount.sol";
 import "erc4337/samples/bls/BLSHelper.sol";
 
-import {CommitmentManager} from "./CommitmentManager.sol";
+import "./Screener.sol";
 
 import "./lib/types.sol";
 
 /**
  * A BLS-based signature aggregator, to validate aggregated signature of multiple UserOps if BLSAccount
  */
-contract Aggregator is IAggregator, CommitmentManager {
+contract Aggregator is IAggregator, Screener {
     using UserOperationLib for UserOperation;
 
     bytes32 public constant BLS_DOMAIN = keccak256("eip4337.bls.domain");
 
     //copied from BLS.sol
     uint256 public constant N = 21888242871839275222246405745257275088696311157297823662689037894645226208583;
+
+    constructor(address commitmentManagerAddress) Screener(commitmentManagerAddress) {}
 
     /**
      * @return publicKey - the public key from a BLS keypair the Aggregator will use to verify this UserOp;
