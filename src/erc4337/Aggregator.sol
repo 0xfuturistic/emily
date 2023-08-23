@@ -8,9 +8,9 @@ import {BLSOpen} from "erc4337/samples/bls/lib/BLSOpen.sol";
 import "erc4337/samples/bls/IBLSAccount.sol";
 import "erc4337/samples/bls/BLSHelper.sol";
 
-import "./Screener.sol";
+import "./../Screener.sol";
 
-import "./lib/types.sol";
+import "./../lib/types.sol";
 
 /**
  * A BLS-based signature aggregator, to validate aggregated signature of multiple UserOps if BLSAccount

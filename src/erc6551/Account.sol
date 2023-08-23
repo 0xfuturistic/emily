@@ -17,7 +17,7 @@ import {BaseAccount as BaseERC4337Account, IEntryPoint, UserOperation} from "acc
 
 import "tokenbound/interfaces/IAccountGuardian.sol";
 
-import "./Screener.sol";
+import "./../Screener.sol";
 
 error NotAuthorized();
 error InvalidInput();
