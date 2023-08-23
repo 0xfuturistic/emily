@@ -61,7 +61,7 @@ contract PEPC is Screener {
     ///      Reverts if the commitment is not satisfied.
     /// @param input The input data containing the signed block.
     function PBSCommitmentRelation(bytes memory input) external view {
-        SignedBlock memory signedBlock = abi.decode(input, (SignedBlock));
+        SignedBlock memory signedBlock = abi.decode(input, (SignedBlock)); // todo: an assignment is received here
         Builder builder = signedBlock.block_.builder;
         Builder committedBuilder = buildersCommitted[signedBlock.block_.proposer][signedBlock.block_.height];
 

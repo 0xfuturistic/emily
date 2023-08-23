@@ -24,9 +24,9 @@ library CommitmentSetLib {
     /// @dev Checks if a CommitmentSet is satisfied by an Assignment.
     /// @param self The CommitmentSet to check.
     /// @param assignment The Assignment to check against.
-    /// @param gasLimit The gas limit for the operation.
+    /// @param totalGasLimit The total gas limit for the CommitmentSet.
     /// @return True if the CommitmentSet is satisfied, false otherwise.
-    function isSatisfied(CommitmentSet storage self, Assignment memory assignment, uint256 gasLimit)
+    function isSatisfied(CommitmentSet storage self, Assignment memory assignment, uint256 totalGasLimit)
         public
         view
         returns (bool)
@@ -39,7 +39,7 @@ library CommitmentSetLib {
 
         /// @dev Checks if all the commitments in self are satisfied by
         //       the assignment
-        uint256 perCommitmentGasLimit = gasLimit / self.inner.length;
+        uint256 perCommitmentGasLimit = totalGasLimit / self.inner.length;
         for (uint256 i = 0; i < self.inner.length; i++) {
             /// @dev If assignment is not in the domain of the commitment, the
             ///      commitment is considered satisfied for any gasLimit.
@@ -49,7 +49,7 @@ library CommitmentSetLib {
             /// @dev Evaluates the relation of commitment at the assignment with
             ///      perCommitmentGasLimit.
             (bool success,) = self.inner[i].relation.address.staticcall{gas: perCommitmentGasLimit}(
-                abi.encodeWithSelector(self.inner[i].relation.selector, assignment)
+                abi.encodeWithSelector(self.inner[i].relation.selector, assignment.value)
             );
 
             if (!success) {

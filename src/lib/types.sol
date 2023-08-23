@@ -12,6 +12,8 @@ struct Commitment {
     function (bytes memory) external view relation;
 }
 
+/// @dev CommitmentSet is a set of commitments. Commitments are
+///      stored in the inner array of the CommitmentSet struct.
 struct CommitmentSet {
     Commitment[] inner;
 }

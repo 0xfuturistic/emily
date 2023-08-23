@@ -35,7 +35,7 @@ contract CommitmentManager is ERC721 {
 
     /// @dev Mint a commitment for msg.sender.
     /// @param commitment The commitment to add to the user's commitments.
-    function mint(Commitment memory commitment) public {
+    function mint(Commitment memory commitment) external {
         uint256 commitmentId = uint256(keccak256(abi.encode(msg.sender, commitment)));
         _mint(msg.sender, commitmentId);
         /// @dev Wrap the commitment in a CommitmentSet and add it to the user's commitments.
