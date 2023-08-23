@@ -107,7 +107,7 @@ contract Account is
         payable
         onlyAuthorized
         onlyUnlocked
-        Screen(msg.sender, this.executeCall.selector, data)
+        Screen(address(this), this.executeCall.selector, abi.encode(to, value, data))
         returns (bytes memory)
     {
         emit TransactionExecuted(to, value, data);
