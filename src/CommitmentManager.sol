@@ -17,12 +17,17 @@ contract CommitmentManager is SoulboundERC721 {
         USER_COMMITMENTS_GAS_LIMIT = userCommitmentsGasLimit;
     }
 
+    function mint(bytes32 scope, function (bytes memory) external view returns (bool) relation) external {
+        Constraint[] memory constraint = new Constraint[](1);
+        constraint[0] = Constraint({scope: scope, relation: relation});
+        mint(Commitment(constraint));
+    }
+
     /// @dev Mint a commitment for msg.sender.
     /// @param commitment The commitment to add to the user's commitments.
-    function mint(Commitment memory commitment) external {
+    function mint(Commitment memory commitment) public {
         uint256 commitmentId = uint256(keccak256(abi.encode(msg.sender, commitment)));
         _mint(msg.sender, commitmentId);
-        // Wrap commitment in a CommitmentSet and add it to the user's commitments.
         _userCommitment[msg.sender].add(commitment);
     }
 
