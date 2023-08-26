@@ -11,20 +11,21 @@ contract CommitmentManagerTest is Test {
     Handler public handler;
 
     function setUp() public {
-        manager = new CommitmentManager(1 ether);
+        manager = new CommitmentManager(10000);
         handler = new Handler(manager);
 
         bytes4[] memory selectors = new bytes4[](1);
-        //selectors[0] = Handler.setConstraint.selector;
+        selectors[0] = Handler.mint.selector;
 
         targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
 
         targetContract(address(handler));
     }
 
+    /*
     function invariant_callSummary() public view {
         handler.callSummary();
-    }
+    }*/
 
     /*
     function test_setConstraint(Domain domain, address newAddress, uint256 newSelector) public {

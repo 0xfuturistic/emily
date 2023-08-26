@@ -32,25 +32,19 @@ contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
     constructor(CommitmentManager manager_) {
         manager = manager_;
     }
-    /*
-    function setConstraint(uint256 actorIndexSeed, Action action, address newAddress, uint256 newSelector)
+
+    function mint(uint256 actorIndexSeed, bytes32 scope, function (bytes memory) external view returns (bool) relation)
         public
-        countCall("setConstraint")
+        countCall("mint")
         useActor(actorIndexSeed)
     {
-        function (bytes memory) external view constraint;
-        assembly {
-            constraint.selector := newSelector
-            constraint.address := newAddress
-        }
-        if (currentActor != intentManager.owner()) vm.expectRevert();
-        intentManager.setConstraint(intent, constraint);
-    }*/
+        manager.mint(scope, relation);
+    }
 
-    function callSummary() external view {
+    function callSummary() public view {
         console.log("Call summary:");
         console.log("-------------------");
-        console.log("setConstraint", calls["setConstraint"]);
+        console.log("mint", calls["mint"]);
         console.log("-------------------");
     }
 }

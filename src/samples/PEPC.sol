@@ -46,14 +46,7 @@ contract PEPC is Screener {
     /// @param height The height of the block.
     /// @param builder The address of the builder to commit to.
     function commitBuilder(Height height, Builder builder) external {
-        (bool success,) = address(commitmentManager).delegatecall(
-            abi.encodeWithSelector(
-                commitmentManager.mint.selector,
-                Constraint({scope: keccak256(abi.encode(this.on_block)), relation: this.PBSCommitmentRelation})
-            )
-        );
-        require(success);
-
+        commitmentManager.mint(keccak256(abi.encode(this.on_block)), this.PBSCommitmentRelation);
         buildersCommitted[Proposer.wrap(msg.sender)][height] = builder;
     }
 
