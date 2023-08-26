@@ -49,7 +49,7 @@ contract PEPC is Screener {
         (bool success,) = address(commitmentManager).delegatecall(
             abi.encodeWithSelector(
                 commitmentManager.mint.selector,
-                Commitment({domainRoot: keccak256(abi.encode(this.on_block)), relation: this.PBSCommitmentRelation})
+                Constraint({scope: keccak256(abi.encode(this.on_block)), relation: this.PBSCommitmentRelation})
             )
         );
         require(success);
@@ -60,11 +60,12 @@ contract PEPC is Screener {
     /// @dev Function to validate that the PBS commitment relation is satisfied.
     ///      Reverts if the commitment is not satisfied.
     /// @param input The input data containing the signed block.
-    function PBSCommitmentRelation(bytes memory input) external view {
+    function PBSCommitmentRelation(bytes memory input) external view returns (bool) {
         SignedBlock memory signedBlock = abi.decode(input, (SignedBlock)); // todo: an assignment is received here
         Builder builder = signedBlock.block_.builder;
         Builder committedBuilder = buildersCommitted[signedBlock.block_.proposer][signedBlock.block_.height];
 
-        if (Builder.unwrap(builder) != Builder.unwrap(committedBuilder)) revert WrongBuilder();
+        if (Builder.unwrap(builder) != Builder.unwrap(committedBuilder)) return false;
+        return true;
     }
 }

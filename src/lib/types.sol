@@ -3,27 +3,27 @@ pragma solidity ^0.8.15;
 
 import "./Lib.sol";
 
-/// @dev A commitment is a relation defined on a domain.
-struct Commitment {
-    bytes32 domainRoot;
-    /// @dev The relation is defined intensionally by a formula.
-    ///      The domain is an instance (an assignment of values)
+struct Constraint {
+    bytes32 scope;
+    // The relation is defined intensionally by a formula.
+    // The domain is an instance (an assignment of values)
     //       but here we define it more generally as a bytes array.
-    function (bytes memory) external view relation;
+    function (bytes memory) external view returns (bool) relation;
 }
 
-/// @dev CommitmentSet is a set of commitments. Commitments are
-///      stored in the inner array of the CommitmentSet struct.
-struct CommitmentSet {
-    Commitment[] inner;
+struct Commitment {
+    Constraint[] inner;
 }
 
-/// @dev An assignment of a value on a domain.
 struct Assignment {
-    bytes32 domainRoot;
+    bytes32 target;
     bytes value;
 }
 
-using CommitmentSetLib for CommitmentSet global;
+using CommitmentLib for Commitment global;
+using CommitmentLib for Constraint global;
+using CommitmentLib for Assignment global;
 
-error UserCommitmentsNotSatisfied(address user, bytes32 domain, bytes value);
+error CommitmentFailed(address user, bytes32 domain, bytes value);
+
+error NotConstraintSolution(Constraint constraint, bytes[] valuesInScope, uint256 totalGasLimit);

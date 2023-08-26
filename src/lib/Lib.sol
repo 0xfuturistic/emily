@@ -3,67 +3,77 @@ pragma solidity ^0.8.15;
 
 import "./types.sol";
 
-/// @title CommitmentSet Library
-/// @dev A library for CommitmentSet.
-library CommitmentSetLib {
-    /// @dev Returns an empty CommitmentSet.
-    /// @return set An empty CommitmentSet.
-    function identity() public pure returns (CommitmentSet memory set) {
-        set = CommitmentSet(new Commitment[](0));
+/// @title Commitment Library
+/// @dev A library for Commitment.
+library CommitmentLib {
+    /// @dev Returns a commitment to no constraints.
+    /// @return identityCommitment A commitment to no constraints.
+    function identity() public pure returns (Commitment memory identityCommitment) {
+        identityCommitment = Commitment(new Constraint[](0));
     }
 
-    /// @dev Adds a CommitmentSet to another CommitmentSet.
-    /// @param self The CommitmentSet to add to.
-    /// @param set The CommitmentSet to add.
-    function add(CommitmentSet storage self, CommitmentSet memory set) internal {
-        for (uint256 i = 0; i < set.inner.length; i++) {
-            self.inner.push(set.inner[i]);
+    /// @dev Adds two commitments together.
+    /// @param commitmentLeft Commitment to add.
+    /// @param commitmentRight Commitment to add.
+    function add(Commitment storage commitmentLeft, Commitment memory commitmentRight) public {
+        for (uint256 i = 0; i < commitmentRight.inner.length; i++) {
+            commitmentLeft.inner.push(commitmentRight.inner[i]);
         }
     }
 
-    /// @dev Checks if a CommitmentSet is satisfied by an Assignment.
-    /// @param self The CommitmentSet to check.
-    /// @param assignment The Assignment to check against.
-    /// @param totalGasLimit The total gas limit for the CommitmentSet.
-    /// @return True if the CommitmentSet is satisfied, false otherwise.
-    function isSatisfied(CommitmentSet storage self, Assignment memory assignment, uint256 totalGasLimit)
+    function isSolution(Commitment memory commitment, Assignment memory assignment, uint256 totalGasLimit)
         public
         view
         returns (bool)
     {
-        /// @dev If self is empty, self is considered consistent
-        ///      for any assignment and any gasLimit.
-        if (self.inner.length == 0) {
-            return true;
-        }
+        return isSolution(commitment.inner, assignment, totalGasLimit);
+    }
 
-        /// @dev Checks if all the commitments in self are satisfied by
-        //       the assignment
-        uint256 perCommitmentGasLimit = totalGasLimit / self.inner.length;
-        for (uint256 i = 0; i < self.inner.length; i++) {
-            /// @dev If assignment is not in the domain of the commitment, the
-            ///      commitment is considered satisfied for any gasLimit.
-            if (self.inner[i].domainRoot != assignment.domainRoot) {
-                continue;
-            }
-            /// @dev Evaluates the relation of commitment at the assignment with
-            ///      perCommitmentGasLimit.
-            (bool success,) = self.inner[i].relation.address.staticcall{gas: perCommitmentGasLimit}(
-                abi.encodeWithSelector(self.inner[i].relation.selector, assignment.value)
-            );
-
-            if (!success) {
+    /// @dev Checks if a compound assignment is a solution to a set of constraints.
+    /// @param constraintSet Constraint set
+    /// @param assignment Instance
+    /// @param totalGasLimit Gas limit for evaluating the constraint's
+    ///                      relation at the assignment.
+    /// @return True if and only if the assignment is a
+    ///         solution to the constraint under the given
+    ///         gas limit.
+    function isSolution(Constraint[] memory constraintSet, Assignment memory assignment, uint256 totalGasLimit)
+        public
+        view
+        returns (bool)
+    {
+        uint256 perConstraintGasLimit = totalGasLimit / constraintSet.length;
+        for (uint256 i = 0; i < constraintSet.length; i++) {
+            if (!isSatisfied(constraintSet[i], assignment, perConstraintGasLimit)) {
                 return false;
             }
         }
         return true;
     }
 
-    /// @dev Wraps a Commitment in a CommitmentSet.
-    /// @param commitment The Commitment to wrap.
-    /// @return  set CommitmentSet containing the given Commitment.
-    function wrap(Commitment memory commitment) public pure returns (CommitmentSet memory set) {
-        set = CommitmentSet(new Commitment[](1));
-        set.inner[0] = commitment;
+    /// @dev Checks if a compound assignment satisfies a constraint.
+    /// @param constraint Constraint
+    /// @param assignment Assignment
+    /// @param gasLimit Gas limit for evaluating the constraint's
+    ///                 relation at the assignment.
+    /// @return success True if and only if the assignment is a
+    ///                 solution to the constraint under the given
+    ///                 gas limit.
+    function isSatisfied(Constraint memory constraint, Assignment memory assignment, uint256 gasLimit)
+        public
+        view
+        returns (bool)
+    {
+        if (constraint.scope != assignment.target) return true;
+
+        (bool success, bytes memory data) = constraint.relation.address.staticcall{gas: gasLimit}(
+            abi.encodeWithSelector(constraint.relation.selector, assignment.value)
+        );
+
+        if (success && abi.decode(data, (bool)) == true) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
