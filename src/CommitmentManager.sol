@@ -14,11 +14,13 @@ contract CommitmentManager {
         ACCOUNT_COMMITMENTS_GAS_LIMIT = accountCommitmentsGasLimit;
     }
 
-    function makeCommitment(bytes32 target, address indicatorFunAddress, bytes4 indicatorFunSelector) external {
+    function makeCommitment(bytes32 target, address indicatorFunctionAddress, bytes4 indicatorFunctionSelector)
+        external
+    {
         function (bytes memory) view external returns (uint256) indicatorFunction;
         assembly {
-            indicatorFunction.address := indicatorFunAddress
-            indicatorFunction.selector := indicatorFunSelector
+            indicatorFunction.address := indicatorFunctionAddress
+            indicatorFunction.selector := indicatorFunctionSelector
         }
         Commitment memory commitment = Commitment({indicatorFunction: indicatorFunction});
         commitments[msg.sender][target].push(commitment);
