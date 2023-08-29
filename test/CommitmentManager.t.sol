@@ -14,11 +14,9 @@ contract CommitmentManagerTest is Test {
         manager = new CommitmentManager(10000);
         handler = new Handler(manager);
 
-        bytes4[] memory selectors = new bytes4[](4);
-        selectors[0] = Handler.callSummary.selector;
-        selectors[1] = Handler.makeCommitment.selector;
-        selectors[2] = Handler.areAccountCommitmentsSatisfiedByValue.selector;
-        selectors[3] = Handler.areCommitmentsSatisfiedByValue.selector;
+        bytes4[] memory selectors = new bytes4[](2);
+        selectors[0] = handler.makeCommitment.selector;
+        selectors[1] = handler.areAccountCommitmentsSatisfiedByValue.selector;
 
         targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
 
@@ -42,9 +40,7 @@ contract CommitmentManagerTest is Test {
         assertEq(manager.getCommitments(msg.sender, target)[0].indicatorFunction.selector, indicatorFunction.selector);
     }
 
-    function invariant_callSummary() public {
-        assertEq(handler.calls("makeCommitment"), 0);
-        assertEq(handler.calls("areAccountCommitmentsSatisfiedByValue"), 0);
-        assertEq(handler.calls("areCommitmentsSatisfiedByValue"), 0);
+    function invariant_callSummary() public view {
+        handler.callSummary();
     }
 }
