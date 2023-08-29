@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "forge-std/Script.sol";
 import "src/CommitmentManager.sol";
 
-contract CommitmentManagerScript is Script {
+contract DeployScript is Script {
     function setUp() public {}
 
     function run() public {

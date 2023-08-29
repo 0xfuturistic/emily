@@ -4,6 +4,8 @@ pragma solidity ^0.8.15;
 import "./lib/types.sol";
 
 contract CommitmentManager {
+    using CommitmentsLib for Commitment[];
+
     uint256 public immutable ACCOUNT_COMMITMENTS_GAS_LIMIT;
 
     mapping(address => Commitment[]) public commitments;
@@ -41,6 +43,6 @@ contract CommitmentManager {
         view
         returns (bool)
     {
-        return CommitmentsLib.areCommitmentsSatisfiedByAssignment(commitments_, assignment);
+        return commitments_.areCommitmentsSatisfiedByAssignment(assignment);
     }
 }
