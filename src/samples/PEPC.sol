@@ -13,15 +13,15 @@ contract PEPC is Screener {
     type Builder is address;
 
     // TODO: struct for a proper eth2 block. this just a sample.
-    struct Block {
+    struct BeaconBlock {
         Height height;
         Proposer proposer;
         Builder builder;
         bytes body;
     }
 
-    struct SignedBlock {
-        Block block_;
+    struct SignedBeaconBlock {
+        BeaconBlock block_;
         bytes32 signature;
     }
 
@@ -36,10 +36,14 @@ contract PEPC is Screener {
     error WrongBuilder();
 
     /// @dev Function to check if a block satisfies the proposer's commitments.
-    /// @param signedBlock The signed block.
-    function on_block(SignedBlock memory signedBlock)
+    /// @param signedBeaconBlock The signed block.
+    function on_block(SignedBeaconBlock memory signedBeaconBlock)
         external
-        Screen(Proposer.unwrap(signedBlock.block_.proposer), keccak256(abi.encode(this.on_block)), abi.encode(signedBlock))
+        Screen(
+            Proposer.unwrap(signedBeaconBlock.block_.proposer),
+            keccak256(abi.encode(this.on_block)),
+            abi.encode(signedBeaconBlock)
+        )
     {}
 
     /// @dev Function for msg.sender to commit to a builder for a certain height.
@@ -52,11 +56,11 @@ contract PEPC is Screener {
 
     /// @dev Function to validate that the PBS commitment relation is satisfied.
     ///      Reverts if the commitment is not satisfied.
-    /// @param input The input data containing the signed block.
-    function PBSCommitmentRelation(bytes memory input) external view returns (bool) {
-        SignedBlock memory signedBlock = abi.decode(input, (SignedBlock)); // todo: an assignment is received here
-        Builder builder = signedBlock.block_.builder;
-        Builder committedBuilder = buildersCommitted[signedBlock.block_.proposer][signedBlock.block_.height];
+    /// @param value The input data containing the signed block.
+    function PBSCommitmentRelation(bytes memory value) external view returns (bool) {
+        SignedBeaconBlock memory signedBeaconBlock = abi.decode(value, (SignedBeaconBlock)); // todo: an assignment is received here
+        Builder builder = signedBeaconBlock.block_.builder;
+        Builder committedBuilder = buildersCommitted[signedBeaconBlock.block_.proposer][signedBeaconBlock.block_.height];
 
         if (Builder.unwrap(builder) != Builder.unwrap(committedBuilder)) return false;
         return true;

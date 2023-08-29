@@ -33,10 +33,37 @@ contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
         manager = manager_;
     }
 
+    function makeCommitment(
+        uint256 actorIndexSeed,
+        bytes32 target,
+        address indicatorFunctionAddress,
+        bytes4 indicatorFunctionSelector
+    ) public useActor(actorIndexSeed) countCall("makeCommitment") {
+        manager.makeCommitment(target, indicatorFunctionAddress, indicatorFunctionSelector);
+    }
+
+    function areAccountCommitmentsSatisfiedByValue(address account, bytes32 target, bytes calldata value)
+        public
+        countCall(keccak256("areAccountCommitmentsSatisfiedByValue"))
+        returns (bool)
+    {
+        return manager.areAccountCommitmentsSatisfiedByValue(account, target, value);
+    }
+
+    function areCommitmentsSatisfiedByValue(Commitment[] memory commitments_, bytes calldata value)
+        public
+        countCall("areCommitmentsSatisfiedByValue")
+        returns (bool)
+    {
+        return manager.areCommitmentsSatisfiedByValue(commitments_, value);
+    }
+
     function callSummary() public view {
         console.log("Call summary:");
         console.log("-------------------");
-        console.log("mint", calls["mint"]);
+        console.log("makeCommitment", calls["makeCommitment"]);
+        console.log("areAccountCommitmentsSatisfiedByValue", calls[keccak256("areAccountCommitmentsSatisfiedByValue")]);
+        console.log("areCommitmentsSatisfiedByValue", calls["areCommitmentsSatisfiedByValue"]);
         console.log("-------------------");
     }
 }

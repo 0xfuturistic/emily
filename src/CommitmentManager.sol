@@ -45,4 +45,8 @@ contract CommitmentManager {
     {
         return commitments_.areCommitmentsSatisfiedByValue(value);
     }
+
+    function getCommitments(address account, bytes32 target) external view returns (Commitment[] memory) {
+        return commitments[account][target];
+    }
 }
