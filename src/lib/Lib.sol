@@ -6,6 +6,10 @@ import "./types.sol";
 /// @title Commitment Library
 /// @dev A library for handling commitments.
 library CommitmentsLib {
+    /// @notice Checks if a given array of commitments is satisfied at a given value.
+    /// @param commitments An array of commitments to check.
+    /// @param value The value to provide to the commitments.
+    /// @return A boolean indicating whether all commitments are satisfied by the given value.
     function areCommitmentsSatisfiedByValue(Commitment[] memory commitments, bytes calldata value)
         public
         view

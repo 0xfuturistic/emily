@@ -27,7 +27,7 @@ error UntrustedImplementation();
 error OwnershipCycle();
 
 /**
- * @title A smart contract account owned by a single ERC721 token
+ * @title A Token Bound Account that implements credible commitments using a screener
  */
 contract Account is
     Screener,

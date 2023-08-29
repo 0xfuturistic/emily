@@ -13,7 +13,7 @@ import "./../Screener.sol";
 import "./../lib/types.sol";
 
 /**
- * A BLS-based signature aggregator, to validate aggregated signature of multiple UserOps if BLSAccount
+ * A BLS-based signature aggregator that implements commitments using a screener
  */
 contract Aggregator is IAggregator, Screener {
     using UserOperationLib for UserOperation;

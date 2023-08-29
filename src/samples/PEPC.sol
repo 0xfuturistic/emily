@@ -6,7 +6,7 @@ import "../Screener.sol";
 
 /// @title PEPC
 /// @dev This contract implements a sample eth2 block and a PBS commitment
-///      relation for the builder committed by the proposer.
+///      for the builder committed by the proposer.
 contract PEPC is Screener {
     type Height is uint256;
     type Proposer is address;
