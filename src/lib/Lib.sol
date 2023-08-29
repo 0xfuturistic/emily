@@ -4,7 +4,7 @@ pragma solidity ^0.8.15;
 import "./types.sol";
 
 /// @title Commitment Library
-/// @dev A library for handling Commitments.
+/// @dev A library for handling commitments.
 library CommitmentsLib {
     function areCommitmentsSatisfiedByAssignment(
         Commitment[] memory commitments,
