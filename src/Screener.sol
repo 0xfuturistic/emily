@@ -18,6 +18,6 @@ contract Screener {
     }
 
     function screen(address account, bytes32 target, bytes memory value) public view virtual returns (bool) {
-        return commitmentManager.areAccountCommitmentsSatisfied(account, target, value);
+        return commitmentManager.areAccountCommitmentsSatisfiedByValue(account, target, value);
     }
 }
