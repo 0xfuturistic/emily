@@ -5,8 +5,6 @@ import "./CommitmentManager.sol";
 import "./lib/types.sol";
 
 /// @title Screener
-/// @dev A contract that provides a modifier to screen function calls
-///      for the satisfaction of a user's commitments.
 contract Screener {
     CommitmentManager public immutable commitmentManager;
 
@@ -20,6 +18,6 @@ contract Screener {
     }
 
     function screen(address account, bytes32 target, bytes memory value) public view virtual returns (bool) {
-        return commitmentManager.isAccountCommitmentSatisfied(account, target, value);
+        return commitmentManager.areAccountCommitmentsSatisfied(account, target, value);
     }
 }

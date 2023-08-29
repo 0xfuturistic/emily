@@ -4,12 +4,12 @@ pragma solidity ^0.8.15;
 import "./lib/types.sol";
 
 contract CommitmentManager {
-    uint256 public immutable ACCOUNT_COMMITMENTS_GAS_LIMIT;
+    uint256 public immutable ACCOUNTcommitments_GAS_LIMIT;
 
-    mapping(address => Commitment[]) internal _commitments;
+    mapping(address => Commitment[]) public commitments;
 
     constructor(uint256 accountCommitmentsGasLimit) {
-        ACCOUNT_COMMITMENTS_GAS_LIMIT = accountCommitmentsGasLimit;
+        ACCOUNTcommitments_GAS_LIMIT = accountCommitmentsGasLimit;
     }
 
     function makeNewCommitment(address indicatorAddress, bytes4 indicatorSelector) public {
@@ -19,7 +19,7 @@ contract CommitmentManager {
             indicator.selector := indicatorSelector
         }
         Commitment memory commitment = Commitment({indicator: indicator});
-        _commitments[msg.sender].push(commitment);
+        commitments[msg.sender].push(commitment);
     }
 
     function areAccountCommitmentsSatisfied(address account, bytes32 target, bytes memory value)
@@ -29,7 +29,7 @@ contract CommitmentManager {
     {
         Assignment memory assignment = Assignment({target: target, value: value});
         return CommitmentsLib.areCommitmentsSatisfiedByAssignment(
-            _commitments[account], assignment, ACCOUNT_COMMITMENTS_GAS_LIMIT
+            commitments[account], assignment, ACCOUNTcommitments_GAS_LIMIT
         );
     }
 }
