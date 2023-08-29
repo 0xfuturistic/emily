@@ -46,25 +46,19 @@ contract PEPC is Screener {
     /// @param height The height of the block.
     /// @param builder The address of the builder to commit to.
     function commitBuilder(Height height, Builder builder) external {
-        (bool success,) = address(commitmentManager).delegatecall(
-            abi.encodeWithSelector(
-                commitmentManager.mint.selector,
-                Commitment({domainRoot: keccak256(abi.encode(this.on_block)), relation: this.PBSCommitmentRelation})
-            )
-        );
-        require(success);
-
+        //commitmentManager.mint(keccak256(abi.encode(this.on_block, height)), this.PBSCommitmentRelation);
         buildersCommitted[Proposer.wrap(msg.sender)][height] = builder;
     }
 
     /// @dev Function to validate that the PBS commitment relation is satisfied.
     ///      Reverts if the commitment is not satisfied.
     /// @param input The input data containing the signed block.
-    function PBSCommitmentRelation(bytes memory input) external view {
+    function PBSCommitmentRelation(bytes memory input) external view returns (bool) {
         SignedBlock memory signedBlock = abi.decode(input, (SignedBlock)); // todo: an assignment is received here
         Builder builder = signedBlock.block_.builder;
         Builder committedBuilder = buildersCommitted[signedBlock.block_.proposer][signedBlock.block_.height];
 
-        if (Builder.unwrap(builder) != Builder.unwrap(committedBuilder)) revert WrongBuilder();
+        if (Builder.unwrap(builder) != Builder.unwrap(committedBuilder)) return false;
+        return true;
     }
 }
