@@ -4,13 +4,8 @@ pragma solidity ^0.8.15;
 import "./Lib.sol";
 
 struct Commitment {
-    function (Assignment memory) external view returns (uint256) indicator;
+    function (bytes memory) external view returns (uint256) indicator;
 }
 
-struct Assignment {
-    bytes32 target;
-    bytes value;
-}
-
-error CommitmentNotSatisfied(Commitment commitment, Assignment assignment, uint256 totalGasLimit);
+error CommitmentNotSatisfied(Commitment commitment, bytes value, uint256 totalGasLimit);
 error AccountCommitmentFailed(address account, bytes32 domain, bytes value);

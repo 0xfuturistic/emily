@@ -8,20 +8,20 @@ contract CommitmentManager {
 
     uint256 public immutable ACCOUNT_COMMITMENTS_GAS_LIMIT;
 
-    mapping(address => Commitment[]) public commitments;
+    mapping(address => mapping(bytes32 => Commitment[])) public commitments;
 
     constructor(uint256 accountCommitmentsGasLimit) {
         ACCOUNT_COMMITMENTS_GAS_LIMIT = accountCommitmentsGasLimit;
     }
 
-    function makeNewCommitment(address indicatorAddress, bytes4 indicatorSelector) external {
-        function (Assignment memory) view external returns (uint256) indicator;
+    function makeCommitment(bytes32 target, address indicatorFunAddress, bytes4 indicatorFunSelector) external {
+        function (bytes memory) view external returns (uint256) indicatorFun;
         assembly {
-            indicator.address := indicatorAddress
-            indicator.selector := indicatorSelector
+            indicatorFun.address := indicatorFunAddress
+            indicatorFun.selector := indicatorFunSelector
         }
-        Commitment memory commitment = Commitment({indicator: indicator});
-        commitments[msg.sender].push(commitment);
+        Commitment memory commitment = Commitment({indicator: indicatorFun});
+        commitments[msg.sender][target].push(commitment);
     }
 
     function areAccountCommitmentsSatisfied(address account, bytes32 target, bytes memory value)
@@ -29,20 +29,14 @@ contract CommitmentManager {
         view
         returns (bool)
     {
-        Assignment memory assignment = Assignment({target: target, value: value});
-
         (bool success,) = address(this).staticcall{gas: ACCOUNT_COMMITMENTS_GAS_LIMIT}(
-            abi.encodeWithSelector(this.areCommitmentsSatisfiedByAssignment.selector, commitments[account], assignment)
+            abi.encodeWithSelector(this.areCommitmentsSatisfied.selector, commitments[account][target], value)
         );
 
         return success;
     }
 
-    function areCommitmentsSatisfiedByAssignment(Commitment[] memory commitments_, Assignment memory assignment)
-        public
-        view
-        returns (bool)
-    {
-        return commitments_.areCommitmentsSatisfiedByAssignment(assignment);
+    function areCommitmentsSatisfied(Commitment[] memory commitments_, bytes memory value) public view returns (bool) {
+        return commitments_.areCommitmentsSatisfied(value);
     }
 }
