@@ -14,6 +14,9 @@ contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
 
     function (bytes memory) external view returns (uint256) public ghost_indicatorFunction;
 
+    bytes public ghost_successfulCommitmentsEncoded;
+    bytes public ghost_value;
+
     mapping(bytes32 => uint256) public calls;
 
     address[] public actors;
@@ -57,7 +60,13 @@ contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
         bytes32 target,
         bytes calldata value
     ) public useActor(actorSeed) countCall(keccak256("areAccountCommitmentsSatisfiedByValue")) {
-        manager.areAccountCommitmentsSatisfiedByValue(account, target, value);
+        bool success = manager.areAccountCommitmentsSatisfiedByValue(account, target, value);
+
+        ghost_value = value;
+
+        if (success) {
+            ghost_successfulCommitmentsEncoded = abi.encode(manager.getCommitments(account, target));
+        }
     }
 
     function callSummary() external view {

@@ -48,6 +48,14 @@ contract CommitmentManagerTest is Test {
         assertEq(actorCommitments[actorCommitments.length - 1].indicatorFunction.selector, indicatorFunction.selector);
     }
 
+    function invariant_commitmentValidity() public view {
+        Commitment[] memory commitments = abi.decode(handler.ghost_successfulCommitmentsEncoded(), (Commitment[]));
+
+        for (uint256 i = 0; i < commitments.length; i++) {
+            commitments[i].indicatorFunction(handler.ghost_value());
+        }
+    }
+
     function invariant_callSummary() public view {
         handler.callSummary();
     }
