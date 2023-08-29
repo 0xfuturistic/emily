@@ -14,22 +14,12 @@ contract Screener {
         commitmentManager = CommitmentManager(commitmentManagerAddress);
     }
 
-    /// @dev Modifier to screen user commitments before executing a
-    ///      function. Reverts if the user commitments are not satisfied.
-    /// @param user The address of the user.
-    /// @param domain The domain of the commitment.
-    /// @param value The value of the commitment.
-    modifier Screen(address user, bytes32 domain, bytes memory value) {
-        if (!screen(user, domain, value)) revert CommitmentFailed(user, domain, value);
+    modifier Screen(address account, bytes32 domain, bytes memory value) {
+        if (!screen(account, domain, value)) revert AccountCommitmentFailed(account, domain, value);
         _;
     }
 
-    /// @dev Checks if the user commitments are satisfied.
-    /// @param user The address of the user.
-    /// @param target The domain of the commitment.
-    /// @param value The value of the commitment.
-    /// @return True if and only if the user's commitments are satisfied.
-    function screen(address user, bytes32 target, bytes memory value) public view virtual returns (bool) {
-        return commitmentManager.areUserCommitmentsSatisfied(user, target, value);
+    function screen(address account, bytes32 target, bytes memory value) public view virtual returns (bool) {
+        return commitmentManager.isAccountCommitmentSatisfied(account, target, value);
     }
 }

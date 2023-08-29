@@ -33,14 +33,6 @@ contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
         manager = manager_;
     }
 
-    function mint(uint256 actorIndexSeed, bytes32 scope, function (bytes memory) external view returns (bool) relation)
-        public
-        countCall("mint")
-        useActor(actorIndexSeed)
-    {
-        manager.mint(scope, relation);
-    }
-
     function callSummary() public view {
         console.log("Call summary:");
         console.log("-------------------");

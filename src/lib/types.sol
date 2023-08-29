@@ -3,16 +3,8 @@ pragma solidity ^0.8.15;
 
 import "./Lib.sol";
 
-struct Constraint {
-    bytes32 scope;
-    // The relation is defined intensionally by a formula.
-    // The domain is an instance (an assignment of values)
-    //       but here we define it more generally as a bytes array.
-    function (bytes memory) external view returns (bool) relation;
-}
-
 struct Commitment {
-    Constraint[] inner;
+    function (Assignment memory) external view returns (uint256)[] indicator;
 }
 
 struct Assignment {
@@ -21,9 +13,7 @@ struct Assignment {
 }
 
 using CommitmentLib for Commitment global;
-using CommitmentLib for Constraint global;
 using CommitmentLib for Assignment global;
 
-error CommitmentFailed(address user, bytes32 domain, bytes value);
-
-error NotConstraintSolution(Constraint constraint, bytes[] valuesInScope, uint256 totalGasLimit);
+error CommitmentNotSatisfied(Commitment commitment, Assignment assignment, uint256 totalGasLimit);
+error AccountCommitmentFailed(address account, bytes32 domain, bytes value);

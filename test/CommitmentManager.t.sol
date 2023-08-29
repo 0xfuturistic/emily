@@ -15,26 +15,11 @@ contract CommitmentManagerTest is Test {
         handler = new Handler(manager);
 
         bytes4[] memory selectors = new bytes4[](1);
-        selectors[0] = Handler.mint.selector;
+        selectors[0] = Handler.callSummary.selector;
+        //selectors[1] = Handler.mint.selector;
 
         targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
 
         targetContract(address(handler));
     }
-
-    /*
-    function invariant_callSummary() public view {
-        handler.callSummary();
-    }*/
-
-    /*
-    function test_setConstraint(Domain domain, address newAddress, uint256 newSelector) public {
-        function (bytes memory) external view constraint;
-        assembly {
-            constraint.selector := newSelector
-            constraint.address := newAddress
-        }
-        //if (msg.sender != intentManager.owner()) vm.expectRevert();
-        intentManager.setConstraint(domain, constraint);
-    }*/
 }
