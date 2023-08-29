@@ -7,6 +7,8 @@ import {CommitmentManager} from "../src/CommitmentManager.sol";
 import {CommitmentManagerHandler as Handler} from "./handlers/CommitmentManagerHandler.sol";
 
 contract CommitmentManagerTest is Test {
+    using CommitmentsLib for Commitment[];
+
     CommitmentManager public manager;
     Handler public handler;
 
@@ -23,11 +25,18 @@ contract CommitmentManagerTest is Test {
         targetContract(address(handler));
     }
 
-    function testMakeCommitment(bytes32 target, address indicatorFunctionAddress, bytes4 indicatorFunctionSelector)
-        public
-    {
-        vm.prank(msg.sender);
+    function testMakeCommitment(
+        address actor,
+        bytes32 target,
+        address indicatorFunctionAddress,
+        bytes4 indicatorFunctionSelector
+    ) public {
+        vm.prank(actor);
         manager.makeCommitment(target, indicatorFunctionAddress, indicatorFunctionSelector);
+
+        Commitment[] memory actorCommitments = manager.getCommitments(actor, target);
+
+        assertEq(actorCommitments.length, 1);
 
         function (bytes memory) external view returns (uint256) indicatorFunction;
         assembly {
@@ -35,9 +44,8 @@ contract CommitmentManagerTest is Test {
             indicatorFunction.selector := indicatorFunctionSelector
         }
 
-        assertEq(manager.getCommitments(msg.sender, target).length, 1);
-        assertEq(manager.getCommitments(msg.sender, target)[0].indicatorFunction.address, indicatorFunction.address);
-        assertEq(manager.getCommitments(msg.sender, target)[0].indicatorFunction.selector, indicatorFunction.selector);
+        assertEq(actorCommitments[actorCommitments.length - 1].indicatorFunction.address, indicatorFunction.address);
+        assertEq(actorCommitments[actorCommitments.length - 1].indicatorFunction.selector, indicatorFunction.selector);
     }
 
     function invariant_callSummary() public view {

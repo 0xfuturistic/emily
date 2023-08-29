@@ -12,6 +12,8 @@ import "../../src/lib/types.sol";
 contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
     CommitmentManager public manager;
 
+    function (bytes memory) external view returns (uint256) public ghost_indicatorFunction;
+
     mapping(bytes32 => uint256) public calls;
 
     address[] public actors;
@@ -45,6 +47,8 @@ contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
         countCall("makeCommitment")
     {
         manager.makeCommitment(target, indicatorFunctionAddress, indicatorFunctionSelector);
+        Commitment[] memory actorCommitments = manager.getCommitments(currentActor, target);
+        ghost_indicatorFunction = actorCommitments[actorCommitments.length - 1].indicatorFunction;
     }
 
     function areAccountCommitmentsSatisfiedByValue(
