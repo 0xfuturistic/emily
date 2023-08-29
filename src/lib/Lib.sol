@@ -6,7 +6,11 @@ import "./types.sol";
 /// @title Commitment Library
 /// @dev A library for handling commitments.
 library CommitmentsLib {
-    function areCommitmentsSatisfied(Commitment[] memory commitments, bytes memory value) public view returns (bool) {
+    function areCommitmentsSatisfied(Commitment[] memory commitments, bytes calldata value)
+        public
+        view
+        returns (bool)
+    {
         for (uint256 i = 0; i < commitments.length; i++) {
             (bool success, bytes memory data) = commitments[i].indicator.address.staticcall(
                 abi.encodeWithSelector(commitments[i].indicator.selector, value)

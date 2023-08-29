@@ -24,7 +24,7 @@ contract CommitmentManager {
         commitments[msg.sender][target].push(commitment);
     }
 
-    function areAccountCommitmentsSatisfied(address account, bytes32 target, bytes memory value)
+    function areAccountCommitmentsSatisfied(address account, bytes32 target, bytes calldata value)
         external
         view
         returns (bool)
@@ -36,7 +36,11 @@ contract CommitmentManager {
         return success;
     }
 
-    function areCommitmentsSatisfied(Commitment[] memory commitments_, bytes memory value) public view returns (bool) {
+    function areCommitmentsSatisfied(Commitment[] memory commitments_, bytes calldata value)
+        public
+        view
+        returns (bool)
+    {
         return commitments_.areCommitmentsSatisfied(value);
     }
 }
