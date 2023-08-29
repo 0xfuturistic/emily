@@ -4,26 +4,23 @@ pragma solidity ^0.8.15;
 import "./lib/types.sol";
 
 contract CommitmentManager {
-    uint256 public immutable ACCOUNT_COMMITMENT_GAS_LIMIT;
+    uint256 public immutable ACCOUNT_COMMITMENTS_GAS_LIMIT;
 
-    mapping(address => Commitment) internal _commitments;
+    mapping(address => Commitment[]) internal _commitments;
 
-    constructor(uint256 accountCommitmentGasLimit) {
-        ACCOUNT_COMMITMENT_GAS_LIMIT = accountCommitmentGasLimit;
+    constructor(uint256 accountCommitmentsGasLimit) {
+        ACCOUNT_COMMITMENTS_GAS_LIMIT = accountCommitmentsGasLimit;
     }
 
     function makeNewCommitment(address indicatorAddress, bytes4 indicatorSelector) public {
-        function (Assignment memory) view external returns (uint256)[] memory indicator =
-            new function (Assignment memory) view external returns (uint256)[](1);
-
-        function (Assignment memory) view external returns (uint256) firstIndicator = indicator[0];
+        function (Assignment memory) view external returns (uint256) indicator;
 
         assembly {
-            firstIndicator.address := indicatorAddress
-            firstIndicator.selector := indicatorSelector
+            indicator.address := indicatorAddress
+            indicator.selector := indicatorSelector
         }
         Commitment memory commitment = Commitment({indicator: indicator});
-        _commitments[msg.sender].concat(commitment);
+        _commitments[msg.sender].push(commitment);
     }
 
     function isAccountCommitmentSatisfied(address account, bytes32 target, bytes memory value)
@@ -32,6 +29,8 @@ contract CommitmentManager {
         returns (bool)
     {
         Assignment memory assignment = Assignment({target: target, value: value});
-        return _commitments[account].isCommitmentSatisfiedByAssignment(assignment, ACCOUNT_COMMITMENT_GAS_LIMIT);
+        return CommitmentsLib.areCommitmentsSatisfiedByAssignment(
+            _commitments[account], assignment, ACCOUNT_COMMITMENTS_GAS_LIMIT
+        );
     }
 }
