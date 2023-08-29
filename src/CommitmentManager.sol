@@ -14,7 +14,6 @@ contract CommitmentManager {
 
     function makeNewCommitment(address indicatorAddress, bytes4 indicatorSelector) public {
         function (Assignment memory) view external returns (uint256) indicator;
-
         assembly {
             indicator.address := indicatorAddress
             indicator.selector := indicatorSelector
@@ -23,7 +22,7 @@ contract CommitmentManager {
         _commitments[msg.sender].push(commitment);
     }
 
-    function isAccountCommitmentSatisfied(address account, bytes32 target, bytes memory value)
+    function areAccountCommitmentsSatisfied(address account, bytes32 target, bytes memory value)
         external
         view
         returns (bool)
