@@ -29,11 +29,11 @@ contract CommitmentManager {
         view
         returns (bool)
     {
-        (bool success,) = address(this).staticcall{gas: ACCOUNT_COMMITMENTS_GAS_LIMIT}(
+        (bool success, bytes memory data) = address(this).staticcall{gas: ACCOUNT_COMMITMENTS_GAS_LIMIT}(
             abi.encodeWithSelector(this.areCommitmentsSatisfiedByValue.selector, commitments[account][target], value)
         );
 
-        return success;
+        return success && abi.decode(data, (bool));
     }
 
     function areCommitmentsSatisfiedByValue(Commitment[] memory commitments_, bytes calldata value)
