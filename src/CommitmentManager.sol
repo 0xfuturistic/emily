@@ -24,23 +24,23 @@ contract CommitmentManager {
         commitments[msg.sender][target].push(commitment);
     }
 
-    function areAccountCommitmentsSatisfied(address account, bytes32 target, bytes calldata value)
+    function areAccountCommitmentsSatisfiedByValue(address account, bytes32 target, bytes calldata value)
         external
         view
         returns (bool)
     {
         (bool success,) = address(this).staticcall{gas: ACCOUNT_COMMITMENTS_GAS_LIMIT}(
-            abi.encodeWithSelector(this.areCommitmentsSatisfied.selector, commitments[account][target], value)
+            abi.encodeWithSelector(this.areCommitmentsSatisfiedByValue.selector, commitments[account][target], value)
         );
 
         return success;
     }
 
-    function areCommitmentsSatisfied(Commitment[] memory commitments_, bytes calldata value)
+    function areCommitmentsSatisfiedByValue(Commitment[] memory commitments_, bytes calldata value)
         public
         view
         returns (bool)
     {
-        return commitments_.areCommitmentsSatisfied(value);
+        return commitments_.areCommitmentsSatisfiedByValue(value);
     }
 }

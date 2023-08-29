@@ -6,7 +6,7 @@ import "./types.sol";
 /// @title Commitment Library
 /// @dev A library for handling commitments.
 library CommitmentsLib {
-    function areCommitmentsSatisfied(Commitment[] memory commitments, bytes calldata value)
+    function areCommitmentsSatisfiedByValue(Commitment[] memory commitments, bytes calldata value)
         public
         view
         returns (bool)
