@@ -12,8 +12,8 @@ library CommitmentsLib {
         returns (bool)
     {
         for (uint256 i = 0; i < commitments.length; i++) {
-            (bool success, bytes memory data) = commitments[i].indicator.address.staticcall(
-                abi.encodeWithSelector(commitments[i].indicator.selector, value)
+            (bool success, bytes memory data) = commitments[i].indicatorFunction.address.staticcall(
+                abi.encodeWithSelector(commitments[i].indicatorFunction.selector, value)
             );
 
             if (!success || abi.decode(data, (uint256)) != 1) {
