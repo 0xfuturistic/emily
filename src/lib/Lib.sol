@@ -6,13 +6,13 @@ import "./types.sol";
 /// @title Commitment Library
 /// @dev A library for handling commitments.
 library CommitmentsLib {
-    function areCommitmentsSatisfiedByAssignment(
-        Commitment[] memory commitments,
-        Assignment memory assignment,
-        uint256 gasLimit
-    ) public view returns (bool) {
+    function areCommitmentsSatisfiedByAssignment(Commitment[] memory commitments, Assignment memory assignment)
+        public
+        view
+        returns (bool)
+    {
         for (uint256 i = 0; i < commitments.length; i++) {
-            (bool success, bytes memory data) = commitments[i].indicator.address.staticcall{gas: gasLimit}(
+            (bool success, bytes memory data) = commitments[i].indicator.address.staticcall(
                 abi.encodeWithSelector(commitments[i].indicator.selector, assignment)
             );
 
