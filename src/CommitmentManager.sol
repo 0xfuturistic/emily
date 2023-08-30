@@ -32,7 +32,7 @@ contract CommitmentManager {
             indicatorFunction.address := indicatorFunctionAddress
             indicatorFunction.selector := indicatorFunctionSelector
         }
-        Commitment memory commitment = Commitment({indicatorFunction: indicatorFunction});
+        Commitment memory commitment = Commitment({timestamp: block.timestamp, indicatorFunction: indicatorFunction});
         commitments[msg.sender][target].push(commitment);
     }
 
