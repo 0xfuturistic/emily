@@ -7,6 +7,7 @@ import "./Lib.sol";
 /// @dev A commitment extensionally defines a subet of values that satisfy it for a target.
 ///      The indicator function returns 1 if and only if the value is in such a subset.
 struct Commitment {
+    uint256 timestamp;
     function (bytes memory) external view returns (uint256) indicatorFunction;
 }
 
