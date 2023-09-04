@@ -34,6 +34,6 @@ contract Screener {
     /// @param value The value being written.
     /// @return True if the account's commitments are satisfied by the value being written, false otherwise.
     function screen(address account, bytes32 target, bytes memory value) public view virtual returns (bool) {
-        return commitmentManager.areAccountCommitmentsSatisfiedByValue(account, target, value);
+        return commitmentManager.areAccountCommitmentsSatisfiedByValue(account, target, value, block.timestamp);
     }
 }

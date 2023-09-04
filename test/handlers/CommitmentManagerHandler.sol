@@ -60,7 +60,7 @@ contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
         bytes32 target,
         bytes calldata value
     ) public useActor(actorSeed) countCall(keccak256("areAccountCommitmentsSatisfiedByValue")) {
-        bool success = manager.areAccountCommitmentsSatisfiedByValue(account, target, value);
+        bool success = manager.areAccountCommitmentsSatisfiedByValue(account, target, value, block.timestamp);
 
         ghost_value = value;
 

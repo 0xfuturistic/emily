@@ -40,14 +40,18 @@ contract CommitmentManager {
     /// @param account The account address.
     /// @param target The target hash.
     /// @param value The value to check against the commitments.
+    /// @param upToTimestamp The timestamp up to which to check the commitments.
     /// @return A boolean indicating whether the commitments are satisfied by the value.
-    function areAccountCommitmentsSatisfiedByValue(address account, bytes32 target, bytes calldata value)
-        external
-        view
-        returns (bool)
-    {
+    function areAccountCommitmentsSatisfiedByValue(
+        address account,
+        bytes32 target,
+        bytes calldata value,
+        uint256 upToTimestamp
+    ) external view returns (bool) {
         (bool success, bytes memory data) = address(this).staticcall{gas: ACCOUNT_COMMITMENTS_GAS_LIMIT}(
-            abi.encodeWithSelector(this.areCommitmentsSatisfiedByValue.selector, commitments[account][target], value)
+            abi.encodeWithSelector(
+                this.areCommitmentsSatisfiedByValue.selector, commitments[account][target], value, upToTimestamp
+            )
         );
 
         return success && abi.decode(data, (bool));
@@ -56,13 +60,14 @@ contract CommitmentManager {
     /// @dev Function that checks if an array of commitments is satisfied by a given value.
     /// @param commitments_ The array of commitments.
     /// @param value The value to check against the commitments.
+    /// @param upToTimestamp The timestamp up to which to check the commitments.
     /// @return A boolean indicating whether the commitments are satisfied by the value.
-    function areCommitmentsSatisfiedByValue(Commitment[] memory commitments_, bytes calldata value)
-        public
-        view
-        returns (bool)
-    {
-        return commitments_.areCommitmentsSatisfiedByValue(value);
+    function areCommitmentsSatisfiedByValue(
+        Commitment[] memory commitments_,
+        bytes calldata value,
+        uint256 upToTimestamp
+    ) public view returns (bool) {
+        return commitments_.areCommitmentsSatisfiedByValue(value, upToTimestamp);
     }
 
     /// @dev Function that returns an array of commitments made by an account to a target.

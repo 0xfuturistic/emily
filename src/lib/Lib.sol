@@ -10,13 +10,13 @@ library CommitmentsLib {
     /// @param commitments An array of commitments.
     /// @param value The value to check against the commitments.
     /// @return A boolean indicating whether the array of commitments is satisfied by the value.
-    function areCommitmentsSatisfiedByValue(Commitment[] memory commitments, bytes calldata value)
-        public
-        view
-        returns (bool)
-    {
+    function areCommitmentsSatisfiedByValue(
+        Commitment[] memory commitments,
+        bytes calldata value,
+        uint256 upToTimestamp
+    ) public view returns (bool) {
         for (uint256 i = 0; i < commitments.length; i++) {
-            if (isFinalized(commitments[i])) {
+            if (isFinalizedByTimestamp(commitments[i], upToTimestamp)) {
                 (bool success, bytes memory data) = commitments[i].indicatorFunction.address.staticcall(
                     abi.encodeWithSelector(commitments[i].indicatorFunction.selector, value)
                 );
@@ -30,11 +30,15 @@ library CommitmentsLib {
     }
 
     /// @notice Checks if a commitment is finalized.
-    /// @param commitments The commitment to check.
+    /// @param commitment The commitment to check.
     /// @return finalized A boolean indicating whether the commitment is finalized.
-    function isFinalized(Commitment memory commitments) public view returns (bool finalized) {
+    function isFinalizedByTimestamp(Commitment memory commitment, uint256 timestamp)
+        public
+        pure
+        returns (bool finalized)
+    {
         // We take a commitment as finalized if it was made more than an epoch ago, where an epoch is 7 minutes (consensus)
-        // Ideally, we'll use something more robust, but this is good enough for now.
-        return block.timestamp - commitments.timestamp > 7 minutes;
+        // Ideally, we'll use something more robust.
+        return timestamp - commitment.timestamp > 7 minutes;
     }
 }
