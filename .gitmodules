@@ -16,3 +16,6 @@
 [submodule "lib/erc6551"]
 	path = lib/erc6551
 	url = https://github.com/erc6551/reference
+[submodule "lib/solhooks"]
+	path = lib/solhooks
+	url = https://github.com/0xfuturistic/solhooks
