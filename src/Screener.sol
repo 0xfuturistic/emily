@@ -5,9 +5,9 @@ import "./CommitmentManager.sol";
 import "./lib/types.sol";
 
 /// @title Screener
-/// @notice A contract that checks if an account's commitments are satisfied by the value being written to a target.
+/// @notice A contract that checks if an account's commitments are satisfied by a value being written to a target.
 contract Screener {
-    /// @notice The commitment manager contract that holds the commitments to be screened against.
+    /// @dev The commitment manager contract that stores the account's commitments.
     CommitmentManager public immutable commitmentManager;
 
     error AccountScreeningFailed(address account, bytes32 target, bytes value);
@@ -22,6 +22,7 @@ contract Screener {
     /// @param account The account that is writing the value.
     /// @param target The target to which the value is being written.
     /// @param value The value being written.
+    /// TODO: use solhooks
     modifier Screen(address account, bytes32 target, bytes memory value) {
         if (!screen(account, target, value)) revert AccountScreeningFailed(account, target, value);
         _;

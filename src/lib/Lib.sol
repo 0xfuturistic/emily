@@ -6,10 +6,10 @@ import "./types.sol";
 /// @title Commitment Library
 /// @dev A library for handling commitments.
 library CommitmentsLib {
-    /// @notice Checks if a given array of commitments is satisfied at a given value.
-    /// @param commitments An array of commitments to check.
-    /// @param value The value to provide to the commitments.
-    /// @return A boolean indicating whether all commitments are satisfied by the given value.
+    /// @notice Checks if commitments are satisfied by a value.
+    /// @param commitments An array of commitments.
+    /// @param value The value to check against the commitments.
+    /// @return A boolean indicating whether the array of commitments is satisfied by the value.
     function areCommitmentsSatisfiedByValue(Commitment[] memory commitments, bytes calldata value)
         public
         view
@@ -29,10 +29,12 @@ library CommitmentsLib {
         return true;
     }
 
-    /// @notice Checks if a given commitment is finalized.
+    /// @notice Checks if a commitment is finalized.
     /// @param commitments The commitment to check.
     /// @return finalized A boolean indicating whether the commitment is finalized.
     function isFinalized(Commitment memory commitments) public view returns (bool finalized) {
+        // We take a commitment as finalized if it was made more than an epoch ago, where an epoch is 7 minutes (consensus)
+        // Ideally, we'll use something more robust, but this is good enough for now.
         return block.timestamp - commitments.timestamp > 7 minutes;
     }
 }
