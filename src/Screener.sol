@@ -5,11 +5,12 @@ import "./CommitmentManager.sol";
 import "./lib/types.sol";
 
 /// @title Screener
-/// @notice A contract that screens an arbitrary value written to a target by an account
-///         for the satisfaction of the account's commitments at the value being written.
+/// @notice A contract that checks if an account's commitments are satisfied by the value being written to a target.
 contract Screener {
     /// @notice The commitment manager contract that holds the commitments to be screened against.
     CommitmentManager public immutable commitmentManager;
+
+    error AccountScreeningFailed(address account, bytes32 target, bytes value);
 
     /// @notice Constructs a new Screener contract instance.
     /// @param commitmentManagerAddress The address of the commitment manager contract.
@@ -22,7 +23,7 @@ contract Screener {
     /// @param target The target to which the value is being written.
     /// @param value The value being written.
     modifier Screen(address account, bytes32 target, bytes memory value) {
-        if (!screen(account, target, value)) revert AccountCommitmentFailed(account, target, value);
+        if (!screen(account, target, value)) revert AccountScreeningFailed(account, target, value);
         _;
     }
 

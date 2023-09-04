@@ -13,6 +13,3 @@ struct Commitment {
 
 /// @dev An error thrown when a commitment is not satisfied.
 error CommitmentNotSatisfied(Commitment commitment, bytes value, uint256 totalGasLimit);
-
-/// @dev An error thrown when an account's commitment fails.
-error AccountCommitmentFailed(address account, bytes32 domain, bytes value);
