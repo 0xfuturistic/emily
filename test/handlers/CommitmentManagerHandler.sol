@@ -12,10 +12,15 @@ import "../../src/lib/types.sol";
 contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
     CommitmentManager public manager;
 
-    function (bytes memory) external view returns (uint256) public ghost_indicatorFunction;
+    struct Assignment {
+        address account;
+        bytes32 target;
+        bytes value;
+        uint256 upToTimestamp;
+    }
 
-    bytes public ghost_successfulCommitmentsEncoded;
-    bytes public ghost_value;
+    Assignment public ghost_satisfiedAssignment;
+    Assignment public ghost_unsatisfiedAssignment;
 
     mapping(bytes32 => uint256) public calls;
 
@@ -50,23 +55,39 @@ contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
         countCall("makeCommitment")
     {
         manager.makeCommitment(target, indicatorFunctionAddress, indicatorFunctionSelector);
-        Commitment[] memory actorCommitments = manager.getCommitments(currentActor, target);
-        ghost_indicatorFunction = actorCommitments[actorCommitments.length - 1].indicatorFunction;
     }
 
     function areAccountCommitmentsSatisfiedByValue(
-        uint256 actorSeed,
         address account,
         bytes32 target,
-        bytes calldata value
-    ) public useActor(actorSeed) countCall(keccak256("areAccountCommitmentsSatisfiedByValue")) {
-        bool success = manager.areAccountCommitmentsSatisfiedByValue(account, target, value, block.timestamp);
-
-        ghost_value = value;
-
-        if (success) {
-            ghost_successfulCommitmentsEncoded = abi.encode(manager.getCommitments(account, target));
+        bytes calldata value,
+        uint256 upToTimestamp
+    ) public countCall(keccak256("areAccountCommitmentsSatisfiedByValue")) returns (bool) {
+        if (manager.areAccountCommitmentsSatisfiedByValue(account, target, value, upToTimestamp)) {
+            ghost_satisfiedAssignment =
+                Assignment({account: account, target: target, value: value, upToTimestamp: upToTimestamp});
+            return true;
+        } else {
+            ghost_unsatisfiedAssignment =
+                Assignment({account: account, target: target, value: value, upToTimestamp: upToTimestamp});
+            return false;
         }
+    }
+
+    function areCommitmentsSatisfiedByValue(
+        Commitment[] memory commitments_,
+        bytes calldata value,
+        uint256 upToTimestamp
+    ) public countCall("areCommitmentsSatisfiedByValue") returns (bool) {
+        return manager.areCommitmentsSatisfiedByValue(commitments_, value, upToTimestamp);
+    }
+
+    function getCommitments(address account, bytes32 target)
+        public
+        countCall("getCommitments")
+        returns (Commitment[] memory)
+    {
+        return manager.getCommitments(account, target);
     }
 
     function callSummary() external view {
@@ -74,6 +95,8 @@ contract CommitmentManagerHandler is CommonBase, StdCheats, StdUtils {
         console.log("-------------------");
         console.log("makeCommitment", calls["makeCommitment"]);
         console.log("areAccountCommitmentsSatisfiedByValue", calls[keccak256("areAccountCommitmentsSatisfiedByValue")]);
+        console.log("areCommitmentsSatisfiedByValue", calls["areCommitmentsSatisfiedByValue"]);
+        console.log("getCommitments", calls["getCommitments"]);
         console.log("-------------------");
     }
 }

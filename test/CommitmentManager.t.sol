@@ -25,7 +25,7 @@ contract CommitmentManagerTest is Test {
         targetContract(address(handler));
     }
 
-    function testMakeCommitment(
+    function test_MakeCommitment(
         address actor,
         bytes32 target,
         address indicatorFunctionAddress,
@@ -48,11 +48,43 @@ contract CommitmentManagerTest is Test {
         assertEq(actorCommitments[actorCommitments.length - 1].indicatorFunction.selector, indicatorFunction.selector);
     }
 
-    function invariant_commitmentValidity() public view {
-        Commitment[] memory commitments = abi.decode(handler.ghost_successfulCommitmentsEncoded(), (Commitment[]));
+    function invariant_areAccountCommitmentsSatisfiedByValue_satisfied() public {
+        (address account, bytes32 target, bytes memory value, uint256 upToTimestamp) =
+            handler.ghost_satisfiedAssignment();
+
+        Commitment[] memory commitments = manager.getCommitments(account, target);
 
         for (uint256 i = 0; i < commitments.length; i++) {
-            commitments[i].indicatorFunction(handler.ghost_value());
+            if (CommitmentsLib.isFinalizedByTimestamp(commitments[i], upToTimestamp)) {
+                (bool success, bytes memory data) = commitments[i].indicatorFunction.address.staticcall(
+                    abi.encodeWithSelector(commitments[i].indicatorFunction.selector, value)
+                );
+
+                assertTrue(success);
+                assertEq(abi.decode(data, (uint256)), 1);
+            }
+        }
+    }
+
+    function invariant_areAccountCommitmentsSatisfiedByValue_unsatisfied() public {
+        (address account, bytes32 target, bytes memory value, uint256 upToTimestamp) =
+            handler.ghost_unsatisfiedAssignment();
+
+        Commitment[] memory commitments = manager.getCommitments(account, target);
+
+        for (uint256 i = 0; i < commitments.length; i++) {
+            if (CommitmentsLib.isFinalizedByTimestamp(commitments[i], upToTimestamp)) {
+                (bool success, bytes memory data) = commitments[i].indicatorFunction.address.staticcall(
+                    abi.encodeWithSelector(commitments[i].indicatorFunction.selector, value)
+                );
+
+                if (!success || abi.decode(data, (uint256)) != 1) {
+                    return;
+                }
+            }
+        }
+        if (commitments.length > 0) {
+            assertFalse(true);
         }
     }
 
