@@ -8,7 +8,7 @@ import "./lib/types.sol";
 /// @notice A contract that checks if an account's commitments are satisfied by a value being written to a target.
 contract Screener {
     /// @dev The commitment manager contract that stores the account's commitments.
-    CommitmentManager public immutable commitmentManager;
+    CommitmentManager public commitmentManager;
 
     error AccountScreeningFailed(address account, bytes32 target, bytes value);
 
@@ -35,5 +35,11 @@ contract Screener {
     /// @return True if the account's commitments are satisfied by the value being written, false otherwise.
     function screen(address account, bytes32 target, bytes memory value) public view virtual returns (bool) {
         return commitmentManager.areAccountCommitmentsSatisfiedByValue(account, target, value, block.timestamp);
+    }
+
+    /// @notice Updates the commitment manager contract address.
+    /// @param newCommitmentManagerAddress The address of the new commitment manager contract.
+    function _updateCommitmentManager(address newCommitmentManagerAddress) internal {
+        commitmentManager = CommitmentManager(newCommitmentManagerAddress);
     }
 }
