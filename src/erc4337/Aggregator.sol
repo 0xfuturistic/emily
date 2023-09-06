@@ -23,7 +23,9 @@ contract Aggregator is IAggregator, Screener {
     //copied from BLS.sol
     uint256 public constant N = 21888242871839275222246405745257275088696311157297823662689037894645226208583;
 
-    constructor(address commitmentManagerAddress) Screener(commitmentManagerAddress) {}
+    constructor(address commitmentManagerAddress) {
+        _setCommitmentManager(commitmentManagerAddress);
+    }
 
     /**
      * @return publicKey - the public key from a BLS keypair the Aggregator will use to verify this UserOp;

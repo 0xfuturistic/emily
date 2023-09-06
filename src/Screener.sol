@@ -12,12 +12,6 @@ contract Screener {
 
     error AccountScreeningFailed(address account, bytes32 target, bytes value);
 
-    /// @notice Constructs a new Screener contract instance.
-    /// @param commitmentManagerAddress The address of the commitment manager contract.
-    constructor(address commitmentManagerAddress) {
-        commitmentManager = CommitmentManager(commitmentManagerAddress);
-    }
-
     /// @notice Modifier that checks if the account's commitments are satisfied by the value being written.
     /// @param account The account that is writing the value.
     /// @param target The target to which the value is being written.
@@ -39,7 +33,7 @@ contract Screener {
 
     /// @notice Updates the commitment manager contract address.
     /// @param newCommitmentManagerAddress The address of the new commitment manager contract.
-    function _updateCommitmentManager(address newCommitmentManagerAddress) internal {
+    function _setCommitmentManager(address newCommitmentManagerAddress) internal {
         commitmentManager = CommitmentManager(newCommitmentManagerAddress);
     }
 }

@@ -12,7 +12,7 @@ contract ScreenTest is Test {
     Screener public screen;
 
     function setUp() public {
-        screen = new Screener(address(new CommitmentManager(10000)));
+        screen = new Screener();
     }
 
     function test_Screen(address account, bytes32 target, bytes memory value) public {

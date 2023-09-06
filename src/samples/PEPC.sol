@@ -26,7 +26,9 @@ contract PEPC is Screener {
     }
 
     /// @dev Constructor for the PEPC contract.
-    constructor(address commitmentManagerAddress) Screener(commitmentManagerAddress) {}
+    constructor(address commitmentManagerAddress) {
+        _setCommitmentManager(commitmentManagerAddress);
+    }
 
     /// @dev Mapping of builders committed by proposers at a certain height.
     mapping(Proposer => mapping(Height => Builder)) public buildersCommitted;
