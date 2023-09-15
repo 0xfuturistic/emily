@@ -98,12 +98,9 @@ function executeCall(address to, uint256 value, bytes calldata data)
 }
 ```
 
-## Road Ahead
-
+## Contribute & Feedback
+Your insights can shape the future of this initiative. Feel free to raise an issue, suggest a feature, or even fork the repository for personal tweaks. If you'd like to contribute, please fork the repository and make changes as you'd like. Pull requests are warmly welcome. Things below are highly desired:
 - Support the creation of commitments without gas costs through EIP712 signatures.
 - Allow bundling of multiple commitments for simultaneous submission.
-
-## Contribute & Feedback
-Your insights can shape the future of this initiative. Feel free to raise an issue, suggest a feature, or even fork the repository for personal tweaks. If you'd like to contribute, please fork the repository and make changes as you'd like. Pull requests are warmly welcome.
 
 For questions and feedback, you can also reach out via [Twitter](https://twitter.com/0xfuturistic).
