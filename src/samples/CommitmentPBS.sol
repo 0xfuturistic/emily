@@ -28,28 +28,28 @@ contract CommitmentPBS is Screener, Ownable {
         bytes32 signature;
     }
 
-    /// @dev A mapping to keep track of whether a builder has been committed to a specific block number by a proposer.
-    ///      The key of the first mapping is the proposer's address, and the key of the second mapping is the block number.
-    ///      The value is a boolean indicating whether a builder has been committed to for the first and second keys.
+    /// @dev A mapping to keep track of whether an account has committed to builder for a block number.
+    ///      The key of the first mapping is the account's address, and the key of the second mapping is the block number.
+    ///      The value is a boolean indicating whether a builder has been committed to.
     mapping(address => mapping(uint256 => bool)) public builderIsCommitted;
 
-    /// @dev A mapping to keep track of the specific builder that every proposer has committed to for a specific block number, if any.
-    ///      The key of the first mapping is the proposer's address, and the key of the second mapping is the block number.
-    ///      The value is the address of the specific builder committed to for the first and second keys.
+    /// @dev A mapping to keep track of the builder an account has committed to for a block number.
+    ///      The key of the first mapping is the account's address, and the key of the second mapping is the block number.
+    ///      The value is the address of the builder committed to.
     mapping(address => mapping(uint256 => address)) public builderCommitted;
 
-    /// @dev Emitted when a new builder is committed to a block number by a proposer.
-    /// @param proposer The address of the proposer who made the commitment.
+    /// @dev Emitted when a new builder is committed for a block number.
+    /// @param account The address of the account making the commitment.
     /// @param builder The address of the builder being committed to.
     /// @param blockNumber The block number for which the builder is being committed to.
-    event NewBuilderCommitted(address proposer, address builder, uint64 blockNumber);
+    event NewBuilderCommitted(address account, address builder, uint64 blockNumber);
 
-    /// @dev Error thrown when a builder is already committed to a block number.
+    /// @dev Error thrown when a builder is already committed for a block number.
     error BuilderAlreadyCommitted();
 
-    /// @notice This function is used to commit to a builder for a given block number.
+    /// @notice This function is used to commit to a builder for a block number.
     /// @param builder The address of the builder to commit to.
-    /// @param blockNumber The block number to commit to the builder for.
+    /// @param blockNumber The block number for committing to the builder.
     function commitToBuilder(address builder, uint64 blockNumber) external {
         if (builderIsCommitted[msg.sender][blockNumber]) revert BuilderAlreadyCommitted();
 
@@ -60,9 +60,10 @@ contract CommitmentPBS is Screener, Ownable {
     }
 
     /// @notice This function is used to check whether a SignedBeaconBlock satisfies a commitment
-    ///         to a builder the proposer of the block may have made, if any.
-    /// @param data The data to be checked for.
-    /// @return 1 if the commitment is satisfied, 0 otherwise.
+    ///         to a builder the proposer of the block may have made.
+    /// @param data The encoded SignedBeaconBlock.
+    /// @return 1 if the builder is the same as the one committed to by the proposer, if any, 0 otherwise.
+    ///         If no commitment was made, the commitment is considered satisfied and 1 is returned.
     function commitmentIndicator(bytes memory data) external view returns (uint256) {
         // decode
         (SignedBeaconBlock memory signedBeaconBlock) = abi.decode(data, (SignedBeaconBlock));
@@ -82,6 +83,8 @@ contract CommitmentPBS is Screener, Ownable {
         }
     }
 
+    /// @dev Sets the address of the commitment manager contract. Can only be called by the contract owner.
+    /// @param newCommitmentManagerAddress The address of the new commitment manager contract.
     function setCommitmentManager(address newCommitmentManagerAddress) external onlyOwner {
         _setCommitmentManager(newCommitmentManagerAddress);
     }
