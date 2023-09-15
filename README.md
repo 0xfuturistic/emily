@@ -1,64 +1,58 @@
 # :magic_wand: Emily: A Protocol for Credible Commitments
 
+Emily is a specialized protocol designed to facilitate and manage credible commitments on Ethereum. This document provides an in-depth overview of Emily's architecture, functionalities, and integration methods.
+
 ![Alt Text](cover.png)
 
-Emily offers a robust and efficient way for making and managing commitments on Ethereum. For a quick look into how leveraging Emily looks like, checkout the sample [PBS commitment](src/samples/CommitmentPBS.sol).
+## **Introduction**
 
-## Core Components
-- **Commitment Manager**: Central smart contract that orchestrates the commitment process.
-- **Commitment Structure**: Defines the properties of a commitment.
-- **Commitment Library**: Contains methods for evaluating and finalizing commitments.
+In the evolving landscape of blockchain technology, ensuring credible commitments is paramount. Emily addresses this need by offering a structured and efficient way to create and manage these commitments on Ethereum. This protocol not only enhances the reliability of commitments but also integrates seamlessly with existing Ethereum standards.
 
-### Commitment Manager
-The Commitment Manager is a smart contract that serves as the backbone of Emily. It performs two key functions:
+For a hands-on experience, explore the [PBS commitment sample](src/samples/CommitmentPBS.sol).
 
-1. **Creating Commitments**: Allows any EVM address to make new commitments.
-2. **Evaluating Commitments**: Checks if a given value satisfies the conditions of a user’s commitments.
-Users can create commitments without incurring gas costs by utilizing EIP712 signatures. Multiple commitments can also be bundled and submitted simultaneously.
+## **Key Features**
 
-### Commitment Structure
-A commitment is characterized by two main elements:
+### **1. Commitment Manager**
+A central smart contract that:
+- Enables EVM addresses to make new commitments.
+- Validates if a provided value satisfies some user's commitments.
 
-1. **Target**: Specifies the subject matter of the commitment, similar to the concept of ‘scope’ in constraint satisfaction problems.
-2. **Indicator Function**: A function that returns ‘1’ if the commitment is satisfied by a given value, and ‘0’ otherwise.
+### **2. Commitment Structure**
+Each commitment comprises:
+- **Target**: Defines the commitment's subject, akin to 'scope' in constraint satisfaction problems.
+- **Indicator Function**: A function that yields '1' if a commitment is satisfied by a specific value, and '0' otherwise.
 ```solidity
 struct Commitment {
     uint256 timestamp;
     function (bytes memory) external view returns (uint256) indicatorFunction;
 }
 ```
-It is with the indicator function that the commitment extensionally defines the subset of values that satisfies it.
+The indicator function delineates the values that fulfill the commitment.
 
-### Commitment Library: CommitmentsLib
-This library contains methods for:
-
-1. Evaluating Commitments: Checks if a given value satisfies an array of commitments.
-2. Finalizing Commitments: Determines if a commitment is finalized.
+### **3. Commitment Library (CommitmentsLib)**
+A library equipped with methods to:
+- Evaluate if a value satisfies to an array of commitments.
+- Determine the finalization status of a commitment.
 ```solidity
 library CommitmentsLib {
     function areCommitmentsSatisfiedByValue(Commitment[] memory commitments, bytes calldata value) public view returns (bool);
     function isFinalized(Commitment memory commitments) public view returns (bool finalized);
 }
 ```
-Currently, commitments are only considered probably finalized by checking if some amount of time has passed since the commitment was included. This, however, is not ideal. In practice, a better option may be for the protocol to verify a proof for the commitment’s finalization.
+Commitments are currently considered finalized based on a time criterion post-inclusion. A more robust approach might involve the protocol checking a proof for the commitment's finalization.
 
-### Resource Management
-Managing computational resources is a challenge due to the EVM’s gas-based operation. To prevent abuse, Emily allocates a fixed amount of gas for evaluating any user’s array of commitments. This ensures that computational resources are capped, bounding the worst-case scenario for distributed validators.
+### **4. Resource Management**
+Given the gas-based operation of the EVM, resource management is crucial. Emily assigns a predetermined gas amount for evaluating any user's commitment array, ensuring a cap on computational resources and safeguarding verifiers from gas-griefing attacks.
 
-## :bug: Integrating Emily into Smart Contracts
-Smart contracts that wish to enforce commitments can utilize a special modifier called Screen after inheriting from Screener.sol. This modifier enables functions to validate whether user actions meet the commitments of their originator.
+## **Integration Guide**
 
-For a practical example of how this works, refer to the sample implementation for PBS in the repository under samples/PEPC.sol, which implements PBS in terms of commitments.
+### **Incorporating Emily in Smart Contracts**
+To enforce commitments, smart contracts should inherit from `Screener.sol` and use the `Screen` modifier. This ensures user actions align with their commitments. When a function importing `Screen` is invoked, the `Screen` modifier activates, prompting the Commitment Manager to verify the user's commitments. The Commitment Manager then collaborates with the Commitment Library to assess the commitments. If they are met, the function proceeds; otherwise, it reverts.
 
-### Account Abstraction (ERC4337)
-The repository also includes an example that integrates commitments into ERC4337 accounts. Specifically, it screens user operations to ensure they satisfy the sender’s commitments.
+![Alt Text](swimlanes.png)
 
-As part of account abstraction, ERC4337 accounts can self-declare the contract responsible for their signature aggregator. The signature aggregator, not the account, is the one that implements the logic for verifying signatures, which can be arbitrary.
-
-In the implementation below, the sample BLS signature aggregator has been extended to enforce commitments on user operations. In practice, a screening function is used to enforce commitments.
-
-Here’s what integrating commitments into a SignatureAggregator looks like. Notice the that the only change is the addition of the modifier Screen.
-
+### **Account Abstraction (ERC4337)**
+Emily can be integrated into ERC4337 accounts to screen user operations, ensuring they meet the sender's commitments. The sample below showcases the integration process, emphasizing the `Screen` modifier's role.
 ```solidity
 /**
 * validate signature of a single userOp
@@ -84,9 +78,8 @@ function validateUserOpSignature(UserOperation calldata userOp)
 }
 ```
 
-### Token Bound Accounts (ERC6551)
-The same commitment-enforcing logic has been applied to token-bound accounts, which is carried out by a slight modification in the executeCall function. Notice the modifier.
-
+### **Token Bound Accounts (ERC6551)**
+Emily's commitment-enforcing logic can be applied to token-bound accounts. The modification in the `executeCall` function ensures that any executed call by the account meets its commitments.
 ```solidity
 /// @dev executes a low-level call against an account if the caller is authorized to make calls
 function executeCall(address to, uint256 value, bytes calldata data)
@@ -104,9 +97,13 @@ function executeCall(address to, uint256 value, bytes calldata data)
     return _call(to, value, data);
 }
 ```
-This change ensures that whenever a call is executed by the account, it satisfies the account’s commitments.
 
-## 🎬 Behind the scenes
-What happens after a function that imports Screen is called? The Screen modifier is invoked, which in turn calls the Commitment Manager to check if the user’s commitments are satisfied. The Commitment Manager then calls the Commitment Library to evaluate the commitments. If the commitments are satisfied, the function is executed. Otherwise, the function reverts.
+## Road Ahead
 
-![Alt Text](swimlanes.png)
+- Support the creation of commitments without gas costs through EIP712 signatures.
+- Allow bundling of multiple commitments for simultaneous submission.
+
+## Contribute & Feedback
+Your insights can shape the future of this initiative. Feel free to raise an issue, suggest a feature, or even fork the repository for personal tweaks. If you'd like to contribute, please fork the repository and make changes as you'd like. Pull requests are warmly welcome.
+
+For questions and feedback, you can also reach out via [Twitter](https://twitter.com/0xfuturistic).
