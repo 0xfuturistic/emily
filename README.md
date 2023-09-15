@@ -2,7 +2,7 @@
 
 ![Alt Text](cover.png)
 
-Emily offers a robust and efficient way for users to make commitments on Ethereum that can later be checked on arbitrary input. For a quick look into how leveraging Emily looks like, checkout the sample [PBS commitment](src/samples/CommitmentPBS.sol).
+Emily offers a robust and efficient way for making and managing commitments on Ethereum. For a quick look into how leveraging Emily looks like, checkout the sample [PBS commitment](src/samples/CommitmentPBS.sol).
 
 ## Core Components
 - **Commitment Manager**: Central smart contract that orchestrates the commitment process.
