@@ -2,7 +2,7 @@
 
 ![Alt Text](cover.png)
 
-Emily offers a robust and efficient way to manage commitments within the EVM. It not only simplifies the process for distributed validators but also ensures that computational resources are effectively managed. It handles the logic for determining whether some user’s commitments are satisfied on behalf of the distributed validator clients, allowing them to find this out by just simulating a call to the smart contract.
+Emily offers a robust and efficient way for users to make commitments on Ethereum that can later be checked on arbitrary input. For a quick look into how leveraging Emily looks like, checkout the sample [PBS commitment](src/samples/CommitmentPBS.sol).
 
 ## Core Components
 - **Commitment Manager**: Central smart contract that orchestrates the commitment process.
