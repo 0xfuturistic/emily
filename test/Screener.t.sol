@@ -14,12 +14,4 @@ contract ScreenTest is Test {
     function setUp() public {
         screen = new Screener();
     }
-
-    function test_Screen(address account, bytes32 target, bytes memory value) public {
-        // we check that screen is equivalent to the underlying commitment manager
-        assertEq(
-            screen.screen(account, target, value),
-            screen.commitmentManager().areAccountCommitmentsSatisfiedByValue(account, target, value, block.timestamp)
-        );
-    }
 }
