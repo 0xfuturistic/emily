@@ -3,9 +3,10 @@ pragma solidity ^0.8.15;
 
 import "../lib/types.sol";
 import "../Screener.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title Commitment PBS (Proposer-Builder-Separation)
-contract CommitmentPBS is Screener {
+contract CommitmentPBS is Screener, Ownable {
     // TODO: struct for a proper eth2 block. this just a sample.
     /// @dev A struct that represents a beacon block.
     /// @param BlockNumber The block number of the beacon block.
@@ -79,5 +80,9 @@ contract CommitmentPBS is Screener {
         } else {
             return 0;
         }
+    }
+
+    function setCommitmentManager(address newCommitmentManagerAddress) external onlyOwner {
+        _setCommitmentManager(newCommitmentManagerAddress);
     }
 }
