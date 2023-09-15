@@ -25,7 +25,7 @@ contract CommitmentManagerTest is Test {
         targetContract(address(handler));
     }
 
-    function test_MakeCommitment(
+    function test_makeCommitment(
         address actor,
         bytes32 target,
         address indicatorFunctionAddress,
