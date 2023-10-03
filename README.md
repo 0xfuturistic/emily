@@ -49,7 +49,44 @@ Given the gas-based operation of the EVM, resource management is crucial. Emily 
 ### **Incorporating Emily in Smart Contracts**
 To enforce commitments, smart contracts should inherit from `Screener.sol` and use the `Screen` modifier. This ensures user actions align with their commitments. When a function importing `Screen` is invoked, the `Screen` modifier activates, prompting the Commitment Manager to verify the user's commitments. The Commitment Manager then collaborates with the Commitment Library to assess the commitments. If they are met, the function proceeds; otherwise, it reverts.
 
-![Alt Text](swimlanes.png)
+```mermaid
+sequenceDiagram
+		participant Screener
+		participant CommitmentManager
+		participant CommitmentsLib
+		participant SampleCommitment
+
+		note over Screener: Screen modifier is called
+		Screener->>CommitmentManager: areAccountCommitmentsSatisfied
+		CommitmentManager->>CommitmentManager: get account's commitments for target
+		note over CommitmentManager: gas usage limit set for checking commitments
+		CommitmentManager->>CommitmentsLib: areCommitmentsSatisfiedByValue
+
+		loop For each commitment
+				break Commitment is not finalized
+						note over CommitmentsLib: ignore the commitment
+				end
+
+				CommitmentsLib->>SampleCommitment: call commitment's indicator fun
+
+				break Commitment is not satisfied
+						SampleCommitment->>CommitmentsLib: return 0
+				end
+				note left of SampleCommitment: Commitment is satisfied
+				SampleCommitment->>CommitmentsLib: return 1
+		end
+
+		break Not all commitments returned 1 for value
+				note over CommitmentsLib: not all commitments satisfied
+				CommitmentsLib->>CommitmentManager: return false
+				CommitmentManager->>Screener: return false
+				Screener->>Screener: revert
+		end
+		note over CommitmentsLib: all commitments satisfied
+		CommitmentsLib->>CommitmentManager: return true
+		CommitmentManager->>Screener: return true
+		note over Screener: continue
+```
 
 ### **Account Abstraction (ERC4337)**
 Emily can be integrated into ERC4337 accounts to screen user operations, ensuring they meet the sender's commitments. The sample below showcases the integration process, emphasizing the `Screen` modifier's role.
