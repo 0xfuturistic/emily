@@ -57,35 +57,33 @@ sequenceDiagram
 		participant SampleCommitment
 
 		note over Screener: Screen modifier is called
+		critical
 		Screener->>CommitmentManager: areAccountCommitmentsSatisfied
-		CommitmentManager->>CommitmentManager: get account's commitments for target
+		CommitmentManager->CommitmentManager: get account's commitments for target
 		note over CommitmentManager: gas usage limit set for checking commitments
 		CommitmentManager->>CommitmentsLib: areCommitmentsSatisfiedByValue
 
 		loop For each commitment
-				break Commitment is not finalized
-						note over CommitmentsLib: ignore the commitment
+				alt Commitment is finalized
+						critical
+								CommitmentsLib->>SampleCommitment: call commitment's indicator fun
+						option Commitment is satisfied
+								SampleCommitment->>CommitmentsLib: return 1
+						option Commitment is not satisfied
+								SampleCommitment->>CommitmentsLib: return 0
+						end
+				else Commitment is not finalized
+						CommitmentsLib-->CommitmentsLib: ignore commitment
 				end
-
-				CommitmentsLib->>SampleCommitment: call commitment's indicator fun
-
-				break Commitment is not satisfied
-						SampleCommitment->>CommitmentsLib: return 0
-				end
-				note left of SampleCommitment: Commitment is satisfied
-				SampleCommitment->>CommitmentsLib: return 1
 		end
-
-		break Not all commitments returned 1 for value
-				note over CommitmentsLib: not all commitments satisfied
-				CommitmentsLib->>CommitmentManager: return false
-				CommitmentManager->>Screener: return false
-				Screener->>Screener: revert
+		option All commitments returned 1
+				note left of CommitmentsLib: all commitments are satisfied
+				CommitmentsLib->>Screener: return true
+		option A commitment returned 0
+				note left of CommitmentsLib: not all commitments are satisfied
+				CommitmentsLib->>Screener: return false
+				Screener-->Screener: revert
 		end
-		note over CommitmentsLib: all commitments satisfied
-		CommitmentsLib->>CommitmentManager: return true
-		CommitmentManager->>Screener: return true
-		note over Screener: continue
 ```
 
 ### **Account Abstraction (ERC4337)**
