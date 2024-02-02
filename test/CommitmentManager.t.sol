@@ -39,9 +39,10 @@ contract CommitmentManagerTest is Test {
         assertEq(actorCommitments.length, 1);
 
         function (bytes memory) external view returns (uint256) indicatorFunction;
+        uint32 selector = uint32(indicatorFunctionSelector);
         assembly {
             indicatorFunction.address := indicatorFunctionAddress
-            indicatorFunction.selector := indicatorFunctionSelector
+            indicatorFunction.selector := selector
         }
 
         assertEq(actorCommitments[actorCommitments.length - 1].indicatorFunction.address, indicatorFunction.address);

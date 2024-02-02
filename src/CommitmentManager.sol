@@ -32,10 +32,11 @@ contract CommitmentManager {
     function makeCommitment(bytes32 target, address indicatorFunctionAddress, bytes4 indicatorFunctionSelector)
         external
     {
+        uint32 selector = uint32(indicatorFunctionSelector);
         function (bytes memory) view external returns (uint256) indicatorFunction;
         assembly {
             indicatorFunction.address := indicatorFunctionAddress
-            indicatorFunction.selector := indicatorFunctionSelector
+            indicatorFunction.selector := selector
         }
         Commitment memory commitment = Commitment({timestamp: block.timestamp, indicatorFunction: indicatorFunction});
         commitments[msg.sender][target].push(commitment);
