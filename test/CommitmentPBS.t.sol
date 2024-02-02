@@ -14,7 +14,7 @@ contract CommitmentPBSTest is Test {
 
     function setUp() public {
         pbs = new CommitmentPBS();
-        pbs.setCommitmentManager(address(manager = new CommitmentManager(10000)));
+        pbs.setCommitmentManager(address(manager = new CommitmentManager(10000, 7 minutes)));
         handler = new Handler(pbs);
 
         bytes4[] memory selectors = new bytes4[](2);

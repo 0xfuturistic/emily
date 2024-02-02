@@ -13,7 +13,7 @@ contract CommitmentManagerTest is Test {
     Handler public handler;
 
     function setUp() public {
-        manager = new CommitmentManager(10000);
+        manager = new CommitmentManager(10000, 7 minutes);
         handler = new Handler(manager);
 
         bytes4[] memory selectors = new bytes4[](2);
@@ -55,7 +55,7 @@ contract CommitmentManagerTest is Test {
         Commitment[] memory commitments = manager.getCommitments(account, target);
 
         for (uint256 i = 0; i < commitments.length; i++) {
-            if (CommitmentsLib.isFinalizedByTimestamp(commitments[i], upToTimestamp)) {
+            if (CommitmentsLib.isFinalizedByTimestamp(commitments[i], upToTimestamp, 7 minutes)) {
                 (bool success, bytes memory data) = commitments[i].indicatorFunction.address.staticcall(
                     abi.encodeWithSelector(commitments[i].indicatorFunction.selector, value)
                 );
@@ -73,7 +73,7 @@ contract CommitmentManagerTest is Test {
         Commitment[] memory commitments = manager.getCommitments(account, target);
 
         for (uint256 i = 0; i < commitments.length; i++) {
-            if (CommitmentsLib.isFinalizedByTimestamp(commitments[i], upToTimestamp)) {
+            if (CommitmentsLib.isFinalizedByTimestamp(commitments[i], upToTimestamp, 7 minutes)) {
                 (bool success, bytes memory data) = commitments[i].indicatorFunction.address.staticcall(
                     abi.encodeWithSelector(commitments[i].indicatorFunction.selector, value)
                 );

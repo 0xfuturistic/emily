@@ -11,13 +11,18 @@ contract CommitmentManager {
     /// @dev The gas limit for the `areAccountCommitmentsSatisfiedByValue` function.
     uint256 public immutable ACCOUNT_COMMITMENTS_GAS_LIMIT;
 
+    /// @dev The amount of seconds required to pass before a commitment is finalized.
+    uint256 public immutable FINALIZATION;
+
     /// @dev A mapping of account addresses to a mapping of target hashes to an array of commitments.
     mapping(address => mapping(bytes32 => Commitment[])) public commitments;
 
     /// @dev Constructor function that sets the `ACCOUNT_COMMITMENTS_GAS_LIMIT`.
     /// @param accountCommitmentsGasLimit The gas limit for the `areAccountCommitmentsSatisfiedByValue` function.
-    constructor(uint256 accountCommitmentsGasLimit) {
+    /// @param finalization_ The amount of seconds required to pass before a commitment is finalized.
+    constructor(uint256 accountCommitmentsGasLimit, uint256 finalization_) {
         ACCOUNT_COMMITMENTS_GAS_LIMIT = accountCommitmentsGasLimit;
+        FINALIZATION = finalization_;
     }
 
     /// @dev Function that creates a new commitment for the calling account and target.
@@ -67,7 +72,7 @@ contract CommitmentManager {
         bytes calldata value,
         uint256 upToTimestamp
     ) public view returns (bool) {
-        return commitments_.areCommitmentsSatisfiedByValue(value, upToTimestamp);
+        return commitments_.areCommitmentsSatisfiedByValue(value, upToTimestamp, FINALIZATION);
     }
 
     /// @dev Function that returns an array of commitments made by an account to a target.
